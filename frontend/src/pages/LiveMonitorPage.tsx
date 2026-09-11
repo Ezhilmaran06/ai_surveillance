@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Play,
   Pause,
@@ -11,7 +11,11 @@ import {
   Video,
   ShieldAlert,
   Sliders,
-  Maximize2
+  Maximize2,
+  Minimize2,
+  Camera,
+  Flame,
+  Download
 } from 'lucide-react';
 import { StatCard } from '../components/StatCard';
 import { TelemetryFrame, Session } from '../types';
@@ -35,6 +39,41 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [showZones, setShowZones] = useState<boolean>(true);
   const [showTrajectories, setShowTrajectories] = useState<boolean>(true);
+  const [showHeatmap, setShowHeatmap] = useState<boolean>(false);
+  const [heatmapOpacity, setHeatmapOpacity] = useState<number>(0.65);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  const videoContainerRef = useRef<HTMLDivElement | null>(null);
+  const streamImgRef = useRef<HTMLImageElement | null>(null);
+  const heatmapCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const handleSnapshot = () => {
+    if (!streamImgRef.current) return;
+    try {
+      const img = streamImgRef.current;
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || 800;
+      canvas.height = img.naturalHeight || 450;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const link = document.createElement('a');
+      link.download = `SentinelVision_Snapshot_${Date.now()}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+    } catch (e) {
+      console.error('Snapshot failed:', e);
+    }
+  };
+
+  const handleToggleFullscreen = () => {
+    if (!videoContainerRef.current) return;
+    if (!document.fullscreenElement) {
+      videoContainerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(console.error);
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(console.error);
+    }
+  };
 
   const peopleCount = telemetry?.people_count ?? 0;
   const peakCount = telemetry?.peak_count ?? 0;
@@ -81,6 +120,31 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
   const streamUrl = activeSession
     ? `/api/sessions/${activeSession.id}/stream?t=${Date.now()}`
     : '';
+
+  useEffect(() => {
+    if (!showHeatmap) return;
+    const canvas = heatmapCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    tracks.forEach((trk) => {
+      const [fx, fy] = trk.foot_point || [trk.centroid[0], trk.centroid[1]];
+      const radius = 48;
+      const grad = ctx.createRadialGradient(fx, fy, 2, fx, fy, radius);
+      grad.addColorStop(0, 'rgba(239, 68, 68, 0.85)');
+      grad.addColorStop(0.35, 'rgba(245, 158, 11, 0.6)');
+      grad.addColorStop(0.7, 'rgba(6, 182, 212, 0.3)');
+      grad.addColorStop(1, 'rgba(6, 182, 212, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(fx, fy, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }, [telemetry?.frame_number, showHeatmap, tracks]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -184,31 +248,54 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
           </div>
 
           {/* Video Container */}
-          <div style={{
-            position: 'relative',
-            backgroundColor: '#05080f',
-            minHeight: '440px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
-          }}>
+          <div
+            ref={videoContainerRef}
+            style={{
+              position: 'relative',
+              backgroundColor: '#05080f',
+              minHeight: '440px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}
+          >
             {activeSession ? (
-              <img
-                src={streamUrl}
-                alt="Live AI Surveillance Stream"
-                style={{
-                  width: '100%',
-                  height: 'auto',
-                  maxHeight: '560px',
-                  objectFit: 'contain',
-                  display: 'block'
-                }}
-                onError={(e) => {
-                  // Fallback if backend server stream is restarting
-                  (e.target as HTMLImageElement).style.opacity = '0.7';
-                }}
-              />
+              <>
+                <img
+                  ref={streamImgRef}
+                  src={streamUrl}
+                  alt="Live AI Surveillance Stream"
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    maxHeight: '560px',
+                    objectFit: 'contain',
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    // Fallback if backend server stream is restarting
+                    (e.target as HTMLImageElement).style.opacity = '0.7';
+                  }}
+                />
+                {showHeatmap && (
+                  <canvas
+                    ref={heatmapCanvasRef}
+                    width={800}
+                    height={450}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      pointerEvents: 'none',
+                      opacity: heatmapOpacity,
+                      mixBlendMode: 'screen'
+                    }}
+                  />
+                )}
+              </>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                 <Video size={48} color="var(--border-subtle)" style={{ marginBottom: '12px' }} />
@@ -239,6 +326,7 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
               <div>RES: <span className="font-mono" style={{ color: '#ffffff' }}>{activeSession?.resolution || 'AUTO'}</span></div>
               <div>YOLO: <span style={{ color: 'var(--status-green)' }}>ACTIVE</span></div>
               <div>ANONYMOUS: <span style={{ color: 'var(--accent-cyan)' }}>ENFORCED</span></div>
+              {showHeatmap && <div>HEATMAP: <span style={{ color: 'var(--status-amber)' }}>{Math.round(heatmapOpacity * 100)}%</span></div>}
             </div>
           </div>
 
@@ -249,9 +337,11 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
             justifyContent: 'space-between',
             padding: '10px 16px',
             borderTop: '1px solid var(--border-subtle)',
-            backgroundColor: 'rgba(17, 24, 39, 0.4)'
+            backgroundColor: 'rgba(17, 24, 39, 0.4)',
+            flexWrap: 'wrap',
+            gap: '10px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 onClick={handleTogglePause}
                 disabled={!activeSession}
@@ -270,9 +360,53 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
                 <Square size={14} color="var(--status-red)" />
                 <span>Stop</span>
               </button>
+              <button
+                onClick={handleSnapshot}
+                disabled={!activeSession}
+                className="btn-secondary"
+                style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                title="Capture forensic frame snapshot"
+              >
+                <Camera size={14} color="var(--accent-cyan)" />
+                <span>Snapshot</span>
+              </button>
+              <button
+                onClick={handleToggleFullscreen}
+                className="btn-secondary"
+                style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                title="Toggle fullscreen command view"
+              >
+                {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                <span>{isFullscreen ? 'Exit Full' : 'Fullscreen'}</span>
+              </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.78rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
+              {/* Heatmap Overlay Toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', color: showHeatmap ? 'var(--status-amber)' : 'inherit', fontWeight: showHeatmap ? 600 : 400 }}>
+                  <input
+                    type="checkbox"
+                    checked={showHeatmap}
+                    onChange={(e) => setShowHeatmap(e.target.checked)}
+                  />
+                  <Flame size={13} color={showHeatmap ? 'var(--status-amber)' : 'var(--text-muted)'} />
+                  Heatmap Overlay
+                </label>
+                {showHeatmap && (
+                  <input
+                    type="range"
+                    min="0.2"
+                    max="1.0"
+                    step="0.05"
+                    value={heatmapOpacity}
+                    onChange={(e) => setHeatmapOpacity(parseFloat(e.target.value))}
+                    style={{ width: '56px', accentColor: 'var(--status-amber)', cursor: 'pointer' }}
+                    title={`Heatmap Opacity: ${Math.round(heatmapOpacity * 100)}%`}
+                  />
+                )}
+              </div>
+
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
                 <input
                   type="checkbox"

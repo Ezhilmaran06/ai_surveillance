@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Layers, Plus, Trash2, Edit2, Check, RefreshCw } from 'lucide-react';
+import { Layers, Plus, Trash2, Edit2, Check, RefreshCw, ShieldAlert, Eye, EyeOff, X, Save, AlertCircle } from 'lucide-react';
 import { Zone, Session } from '../types';
 import { api } from '../services/api';
 
@@ -21,6 +21,8 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
   const [newZoneColor, setNewZoneColor] = useState<string>('#06b6d4');
   const [newCapacity, setNewCapacity] = useState<number>(4);
   const [newDwellLimit, setNewDwellLimit] = useState<number>(10);
+  const [isRestricted, setIsRestricted] = useState<boolean>(false);
+  const [editingZone, setEditingZone] = useState<Zone | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Redraw canvas with zones
@@ -56,11 +58,20 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
         const pts: [number, number][] = JSON.parse(z.coordinates_json);
         if (pts.length < 2) return;
 
-        ctx.strokeStyle = z.color || '#06b6d4';
-        ctx.lineWidth = 2;
+        const isInactive = !z.is_active;
+        const isRestr = z.is_restricted;
+        const color = isInactive ? '#64748b' : isRestr ? '#ef4444' : (z.color || '#06b6d4');
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = isRestr ? 2.5 : 2;
+        if (isInactive) {
+          ctx.setLineDash([6, 4]);
+        } else {
+          ctx.setLineDash([]);
+        }
 
         if (z.zone_type === 'polygon') {
-          ctx.fillStyle = `${z.color}33`; // 20% alpha
+          ctx.fillStyle = isInactive ? 'rgba(100, 116, 139, 0.1)' : isRestr ? 'rgba(239, 68, 68, 0.25)' : `${z.color}33`;
           ctx.beginPath();
           ctx.moveTo(pts[0][0], pts[0][1]);
           for (let i = 1; i < pts.length; i++) {
@@ -71,9 +82,10 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
           ctx.stroke();
 
           // Label
-          ctx.fillStyle = '#ffffff';
-          ctx.font = '12px Plus Jakarta Sans';
-          ctx.fillText(`${z.name} (Max: ${z.max_capacity})`, pts[0][0] + 6, pts[0][1] + 16);
+          ctx.fillStyle = isRestr ? '#fca5a5' : '#ffffff';
+          ctx.font = 'bold 11px Plus Jakarta Sans';
+          const badge = isRestr ? '🚨 RESTRICTED: ' : isInactive ? '[DISABLED] ' : '';
+          ctx.fillText(`${badge}${z.name} (Max: ${z.max_capacity})`, pts[0][0] + 6, pts[0][1] + 16);
         } else if (z.zone_type === 'line') {
           ctx.beginPath();
           ctx.moveTo(pts[0][0], pts[0][1]);
@@ -81,10 +93,11 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
           ctx.stroke();
 
           // Label
-          ctx.fillStyle = z.color;
-          ctx.font = '12px Plus Jakarta Sans';
+          ctx.fillStyle = color;
+          ctx.font = 'bold 11px Plus Jakarta Sans';
           ctx.fillText(`Tripwire: ${z.name}`, pts[0][0] + 6, pts[0][1] - 8);
         }
+        ctx.setLineDash([]);
       } catch (e) {
         console.error(e);
       }
@@ -135,24 +148,53 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
     if (pts.length < 2) return;
     setIsSubmitting(true);
     try {
-      const name = newZoneName || (type === 'polygon' ? `Security Zone ${zones.length + 1}` : `Tripwire ${zones.length + 1}`);
+      const name = newZoneName || (type === 'polygon' ? (isRestricted ? `Restricted Zone ${zones.length + 1}` : `Security Zone ${zones.length + 1}`) : `Tripwire ${zones.length + 1}`);
       await api.createZone({
         name,
         zone_type: type,
         coordinates_json: JSON.stringify(pts),
-        color: newZoneColor,
+        color: isRestricted ? '#ef4444' : newZoneColor,
         max_capacity: newCapacity,
         dwell_threshold_seconds: newDwellLimit,
-        is_active: true
+        is_active: true,
+        is_restricted: isRestricted
       });
       setCurrentPoints([]);
       setDrawingMode(null);
       setNewZoneName('');
+      setIsRestricted(false);
       onZonesChanged();
     } catch (e) {
       console.error(e);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleToggleActive = async (z: Zone) => {
+    try {
+      await api.updateZone(z.id, { is_active: !z.is_active });
+      onZonesChanged();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingZone) return;
+    try {
+      await api.updateZone(editingZone.id, {
+        name: editingZone.name,
+        max_capacity: editingZone.max_capacity,
+        dwell_threshold_seconds: editingZone.dwell_threshold_seconds,
+        color: editingZone.color,
+        is_restricted: editingZone.is_restricted,
+        is_active: editingZone.is_active
+      });
+      setEditingZone(null);
+      onZonesChanged();
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -361,7 +403,7 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
                 </label>
                 <input
                   type="color"
-                  value={newZoneColor}
+                  value={isRestricted ? '#ef4444' : newZoneColor}
                   onChange={(e) => setNewZoneColor(e.target.value)}
                   style={{
                     width: '100%',
@@ -373,6 +415,27 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
                   }}
                 />
               </div>
+
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 10px',
+                borderRadius: '4px',
+                backgroundColor: isRestricted ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-main)',
+                border: `1px solid ${isRestricted ? 'rgba(239, 68, 68, 0.4)' : 'var(--border-subtle)'}`,
+                cursor: 'pointer',
+                color: isRestricted ? '#fca5a5' : 'var(--text-primary)',
+                fontWeight: isRestricted ? 700 : 500
+              }}>
+                <input
+                  type="checkbox"
+                  checked={isRestricted}
+                  onChange={(e) => setIsRestricted(e.target.checked)}
+                />
+                <ShieldAlert size={15} color={isRestricted ? "var(--status-red)" : "var(--text-muted)"} />
+                <span>Restricted Area (Critical Intrusion Alert)</span>
+              </label>
             </div>
           </div>
 
@@ -393,8 +456,9 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
                       justifyContent: 'space-between',
                       padding: '10px 12px',
                       borderRadius: '6px',
-                      backgroundColor: 'rgba(8, 12, 20, 0.5)',
-                      border: '1px solid var(--border-subtle)'
+                      backgroundColor: z.is_restricted ? 'rgba(239, 68, 68, 0.06)' : 'rgba(8, 12, 20, 0.5)',
+                      border: `1px solid ${z.is_restricted ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-subtle)'}`,
+                      opacity: z.is_active ? 1 : 0.6
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -402,11 +466,21 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
                         width: '10px',
                         height: '10px',
                         borderRadius: '2px',
-                        backgroundColor: z.color || '#06b6d4'
+                        backgroundColor: z.is_restricted ? '#ef4444' : (z.color || '#06b6d4')
                       }} />
                       <div>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#ffffff' }}>
-                          {z.name}
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>{z.name}</span>
+                          {z.is_restricted && (
+                            <span style={{ fontSize: '0.62rem', padding: '1px 4px', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#f87171', borderRadius: '3px', fontWeight: 700 }}>
+                              RESTRICTED
+                            </span>
+                          )}
+                          {!z.is_active && (
+                            <span style={{ fontSize: '0.62rem', padding: '1px 4px', backgroundColor: 'rgba(100, 116, 139, 0.2)', color: '#94a3b8', borderRadius: '3px', fontWeight: 600 }}>
+                              OFF
+                            </span>
+                          )}
                         </div>
                         <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
                           {z.zone_type.toUpperCase()} • Cap: {z.max_capacity} • Dwell: {z.dwell_threshold_seconds}s
@@ -414,13 +488,32 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handleDelete(z.id)}
-                      className="btn-danger"
-                      style={{ padding: '4px 8px' }}
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <button
+                        onClick={() => handleToggleActive(z)}
+                        className="btn-secondary"
+                        style={{ padding: '4px 6px' }}
+                        title={z.is_active ? "Disable Zone" : "Enable Zone"}
+                      >
+                        {z.is_active ? <Eye size={13} color="var(--status-green)" /> : <EyeOff size={13} color="var(--text-muted)" />}
+                      </button>
+                      <button
+                        onClick={() => setEditingZone({ ...z })}
+                        className="btn-secondary"
+                        style={{ padding: '4px 6px' }}
+                        title="Edit Zone Properties"
+                      >
+                        <Edit2 size={13} color="var(--accent-cyan)" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(z.id)}
+                        className="btn-danger"
+                        style={{ padding: '4px 6px' }}
+                        title="Delete Zone"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -432,6 +525,92 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Edit Zone Modal */}
+      {editingZone && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(3, 7, 18, 0.75)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+          padding: '20px'
+        }}>
+          <div className="hud-panel glow-cyan" style={{ width: '100%', maxWidth: '440px', padding: '20px', borderRadius: '8px', border: '1px solid var(--accent-cyan)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Edit Zone: {editingZone.name}
+              </h3>
+              <button onClick={() => setEditingZone(null)} className="btn-secondary" style={{ padding: '4px' }}>
+                <X size={14} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.78rem' }}>
+              <div>
+                <label style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Zone Name</label>
+                <input
+                  type="text"
+                  value={editingZone.name}
+                  onChange={(e) => setEditingZone({ ...editingZone, name: e.target.value })}
+                  style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: '#ffffff' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Max Capacity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={editingZone.max_capacity}
+                    onChange={(e) => setEditingZone({ ...editingZone, max_capacity: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: '#ffffff' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Dwell Limit (sec)</label>
+                  <input
+                    type="number"
+                    min="2"
+                    max="120"
+                    value={editingZone.dwell_threshold_seconds}
+                    onChange={(e) => setEditingZone({ ...editingZone, dwell_threshold_seconds: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: '#ffffff' }}
+                  />
+                </div>
+              </div>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginTop: '4px' }}>
+                <input
+                  type="checkbox"
+                  checked={editingZone.is_restricted || false}
+                  onChange={(e) => setEditingZone({ ...editingZone, is_restricted: e.target.checked })}
+                />
+                <ShieldAlert size={14} color="var(--status-red)" />
+                <span style={{ color: '#ffffff' }}>Designate as Restricted Security Area</span>
+              </label>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button onClick={() => setEditingZone(null)} className="btn-secondary" style={{ fontSize: '0.8rem' }}>
+                  Cancel
+                </button>
+                <button onClick={handleSaveEdit} className="btn-primary" style={{ fontSize: '0.8rem' }}>
+                  <Save size={13} />
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

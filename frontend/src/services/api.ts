@@ -112,6 +112,11 @@ export const api = {
     return res.json();
   },
 
+  deleteAlert: async (alertId: number) => {
+    const res = await fetch(`${API_BASE}/alerts/${alertId}`, { method: 'DELETE' });
+    return res.json();
+  },
+
   clearAlerts: async () => {
     const res = await fetch(`${API_BASE}/alerts/clear`, { method: 'DELETE' });
     return res.json();

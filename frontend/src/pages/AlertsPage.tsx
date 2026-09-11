@@ -46,6 +46,15 @@ export const AlertsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteAlert = async (id: number) => {
+    try {
+      await api.deleteAlert(id);
+      fetchAlerts();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleClearAlerts = async () => {
     if (confirm('Clear all historical alerts?')) {
       try {
@@ -245,20 +254,30 @@ export const AlertsPage: React.FC = () => {
                   </td>
 
                   <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                    {!alert.acknowledged ? (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      {!alert.acknowledged ? (
+                        <button
+                          onClick={() => handleAcknowledge(alert.id)}
+                          className="btn-secondary"
+                          style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+                        >
+                          <Check size={13} color="var(--status-green)" />
+                          Acknowledge
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                          ✓ Acknowledged
+                        </span>
+                      )}
                       <button
-                        onClick={() => handleAcknowledge(alert.id)}
-                        className="btn-secondary"
-                        style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+                        onClick={() => handleDeleteAlert(alert.id)}
+                        className="btn-danger"
+                        style={{ padding: '4px 8px' }}
+                        title="Delete Alert Record"
                       >
-                        <Check size={13} color="var(--status-green)" />
-                        Acknowledge
+                        <Trash2 size={13} />
                       </button>
-                    ) : (
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        ✓ Acknowledged
-                      </span>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))
