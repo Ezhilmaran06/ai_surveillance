@@ -55,13 +55,43 @@ class Track:
     def centroid(self) -> Tuple[float, float]:
         return ((self.bbox[0] + self.bbox[2]) / 2.0, (self.bbox[1] + self.bbox[3]) / 2.0)
 
+    @property
+    def speed(self) -> float:
+        """Estimated velocity magnitude in pixels per second."""
+        return float(np.hypot(self.velocity[0], self.velocity[1]))
+
+    @property
+    def movement_state(self) -> str:
+        """
+        Rule-based movement state classifier:
+        - STATIONARY (< 8 px/s)
+        - WALKING (8 - 45 px/s)
+        - FAST MOVEMENT (45 - 120 px/s)
+        - UNUSUAL MOVEMENT (> 120 px/s)
+        """
+        spd = self.speed
+        if spd < 8.0:
+            return "STATIONARY"
+        elif spd < 45.0:
+            return "WALKING"
+        elif spd < 120.0:
+            return "FAST MOVEMENT"
+        else:
+            return "UNUSUAL MOVEMENT"
+
     def update(self, bbox: List[float], conf: float, timestamp: float):
         old_cx, old_cy = self.centroid
         new_cx = (bbox[0] + bbox[2]) / 2.0
         new_cy = (bbox[1] + bbox[3]) / 2.0
         dt = max(1e-3, timestamp - self.last_seen)
 
-        self.velocity = [(new_cx - old_cx) / dt, (new_cy - old_cy) / dt]
+        # Smooth velocity with exponential decay
+        inst_vx = (new_cx - old_cx) / dt
+        inst_vy = (new_cy - old_cy) / dt
+        self.velocity = [
+            0.6 * self.velocity[0] + 0.4 * inst_vx,
+            0.6 * self.velocity[1] + 0.4 * inst_vy
+        ]
         self.bbox = bbox
         self.conf = conf
         self.last_seen = timestamp
@@ -174,6 +204,8 @@ class MultiObjectTracker:
                     "foot_point": [round(foot_x, 1), round(foot_y, 1)],
                     "centroid": [round(cx, 1), round(cy, 1)],
                     "dwell_time": round(trk.dwell_time, 1),
+                    "speed": round(trk.speed, 1),
+                    "movement_state": trk.movement_state,
                     "zones": list(trk.current_zones),
                     "trajectory": [
                         [round(pt[0], 1), round(pt[1], 1)]

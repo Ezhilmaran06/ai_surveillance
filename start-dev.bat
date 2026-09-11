@@ -1,9 +1,9 @@
 @echo off
-title AegisVision AI Command Center Launcher
+title SentinelVision AI Command Center Launcher
 color 0B
 
 echo ======================================================================
-echo           AEGISVISION AI SURVEILLANCE COMMAND CENTER
+echo          SENTINELVISION AI SURVEILLANCE COMMAND CENTER
 echo         Anonymous Crowd Analytics & Spatial Intelligence
 echo ======================================================================
 echo.
@@ -23,7 +23,7 @@ if not exist "venv\Scripts\python.exe" (
 :: 2. Check Backend Dependencies
 echo [*] Checking Backend Dependencies...
 call .\venv\Scripts\activate.bat
-pip install -r backend\requirements.txt
+pip install -q -r backend\requirements.txt
 
 :: 3. Check Frontend Dependencies
 echo [*] Checking Frontend Dependencies...
@@ -37,15 +37,15 @@ cd ..
 :: 4. Start FastAPI Backend Server
 echo.
 echo [*] Launching FastAPI Surveillance Backend on http://127.0.0.1:8000 ...
-start "AegisVision AI Backend" cmd /k "cd /d "%~dp0" && call .\venv\Scripts\activate.bat && python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload"
+start "SentinelVision AI Backend" cmd /k "cd /d "%~dp0" && call .\venv\Scripts\activate.bat && set PYTHONPATH=. && python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload"
 
 :: 5. Start React + Vite Frontend Server
 echo [*] Launching React Command Center UI on http://localhost:5173 ...
-start "AegisVision AI Frontend" cmd /k "cd /d "%~dp0\frontend" && npm run dev"
+start "SentinelVision AI Frontend" cmd /k "cd /d "%~dp0\frontend" && npm run dev"
 
 echo.
 echo ======================================================================
-echo [*] AegisVision AI Command Center is starting!
+echo [*] SentinelVision AI Command Center is starting!
 echo [*] Frontend: http://localhost:5173
 echo [*] Backend API: http://127.0.0.1:8000/api
 echo [*] API Documentation: http://127.0.0.1:8000/docs

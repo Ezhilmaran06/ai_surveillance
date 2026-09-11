@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  sentinelvision:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sentinelvision-ai:latest
+    container_name: sentinelvision_server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8000
+      - DATABASE_URL=sqlite:///data/surveillance.db
+      - MODEL_PATH=yolov8n.pt
+      - CONFIDENCE_THRESHOLD=0.35
+      - IOU_THRESHOLD=0.45
+      - MONITORED_AREA_M2=50.0
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./weights:/app/weights
+      - ./reports:/app/reports

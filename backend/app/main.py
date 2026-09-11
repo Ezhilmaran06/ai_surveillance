@@ -1,4 +1,10 @@
 import logging
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    torch = None
+    HAS_TORCH = False
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,11 +24,11 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
-logger = logging.getLogger("ai_surveillance")
+logger = logging.getLogger("sentinelvision")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Initializing database tables...")
+    logger.info("Initializing SentinelVision database tables...")
     init_db()
     logger.info("Database initialized successfully.")
     yield
@@ -31,7 +37,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    lifespan=lifespan
+    lifespan=lifespan,
+    description="Production-grade AI Surveillance & Anonymous Crowd Analytics Platform."
 )
 
 # Enable CORS for frontend Vite development
@@ -53,11 +60,22 @@ app.include_router(ws_router)
 
 @app.get("/api/health")
 def health_check():
+    has_cuda = (torch.cuda.is_available() if HAS_TORCH and torch and hasattr(torch, "cuda") else False)
+    device_name = "CUDA" if has_cuda else "CPU"
     return {
         "status": "healthy",
+        "system_status": "ONLINE",
         "service": settings.APP_NAME,
         "version": settings.VERSION,
-        "privacy": "Anonymous crowd analytics - no biometric or face recognition used."
+        "device": device_name,
+        "components": {
+            "backend": "ONLINE",
+            "database": "ONLINE",
+            "ai_engine": "ONLINE",
+            "websocket": "ONLINE",
+            "model_path": settings.DEFAULT_MODEL
+        },
+        "privacy": "Strictly anonymous crowd analytics. Zero facial recognition or biometric capture."
     }
 
 @app.get("/api/privacy")

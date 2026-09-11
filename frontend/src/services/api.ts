@@ -131,6 +131,14 @@ export const api = {
     return res.json();
   },
 
+  getInsights: async (sessionId?: number) => {
+    const url = sessionId
+      ? `${API_BASE}/analytics/insights?session_id=${sessionId}`
+      : `${API_BASE}/analytics/insights`;
+    const res = await fetch(url);
+    return res.json();
+  },
+
   // Settings
   getSettings: async () => {
     const res = await fetch(`${API_BASE}/settings`);

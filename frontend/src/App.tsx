@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { Sidebar, TabType } from './components/Sidebar';
+import { DashboardPage } from './pages/DashboardPage';
 import { LiveMonitorPage } from './pages/LiveMonitorPage';
 import { ZoneEditorPage } from './pages/ZoneEditorPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
@@ -13,13 +14,52 @@ import { Session, Zone, Alert } from './types';
 import { api } from './services/api';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('monitor');
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [zones, setZones] = useState<Zone[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('sentinel_audio') !== 'false';
+  });
+
+  const prevAlertCountRef = useRef<number>(0);
 
   const { telemetry, isConnected } = useSurveillanceWebSocket();
+
+  // Synthesize soft audio chime for new security alerts using Web Audio API
+  const playAlertChime = () => {
+    if (!isAudioEnabled) return;
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880.0, ctx.currentTime + 0.12); // A5
+
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.36);
+    } catch (e) {
+      // Audio autoplay restrictions or headless environment
+    }
+  };
+
+  const handleToggleAudio = () => {
+    setIsAudioEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem('sentinel_audio', String(next));
+      return next;
+    });
+  };
 
   const loadSessions = async () => {
     try {
@@ -53,6 +93,10 @@ export const App: React.FC = () => {
   const loadAlerts = async () => {
     try {
       const data = await api.getAlerts();
+      if (data.length > prevAlertCountRef.current && prevAlertCountRef.current > 0) {
+        playAlertChime();
+      }
+      prevAlertCountRef.current = data.length;
       setAlerts(data);
     } catch (e) {
       console.error('Failed loading alerts:', e);
@@ -85,6 +129,8 @@ export const App: React.FC = () => {
         telemetry={telemetry}
         activeSessionName={activeSession?.name}
         onAcknowledgeAll={unackCount > 0 ? handleAcknowledgeAll : undefined}
+        isAudioEnabled={isAudioEnabled}
+        onToggleAudio={handleToggleAudio}
       />
 
       <div style={{ display: 'flex', flex: 1 }}>
@@ -95,6 +141,18 @@ export const App: React.FC = () => {
         />
 
         <main style={{ flex: 1, padding: '20px 24px', overflowY: 'auto' }}>
+          {activeTab === 'dashboard' && (
+            <DashboardPage
+              telemetry={telemetry}
+              activeSession={activeSession}
+              zones={zones}
+              alerts={alerts}
+              onNavigateToMonitor={() => setActiveTab('monitor')}
+              onNavigateToZones={() => setActiveTab('zones')}
+              onNavigateToAlerts={() => setActiveTab('alerts')}
+            />
+          )}
+
           {activeTab === 'monitor' && (
             <LiveMonitorPage
               telemetry={telemetry}

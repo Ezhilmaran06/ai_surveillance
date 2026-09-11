@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Download, Printer, ShieldCheck, CheckCircle2, Lock } from 'lucide-react';
+import { FileText, Download, Printer, ShieldCheck, Lock, ExternalLink } from 'lucide-react';
 import { Session, Alert } from '../types';
 
 interface ReportsPageProps {
@@ -16,6 +16,8 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts 
     window.print();
   };
 
+  const pdfUrl = `/api/analytics/export/pdf${activeSession ? `?session_id=${activeSession.id}` : ''}`;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* Top Banner */}
@@ -26,13 +28,15 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts 
         padding: '16px 20px',
         borderRadius: '8px',
         backgroundColor: 'var(--bg-panel)',
-        border: '1px solid var(--border-subtle)'
+        border: '1px solid var(--border-subtle)',
+        flexWrap: 'wrap',
+        gap: '12px'
       }}>
         <div>
-          <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
             Executive Surveillance & Compliance Audit Report
           </h2>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
             Official perimeter telemetry summaries, crowd threshold compliance, and privacy verification audits.
           </p>
         </div>
@@ -40,16 +44,17 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button onClick={handlePrint} className="btn-secondary" style={{ fontSize: '0.8rem' }}>
             <Printer size={14} />
-            Print Report
+            Print View
           </button>
           <a
-            href={`/api/analytics/export/csv${activeSession ? `?session_id=${activeSession.id}` : ''}`}
-            download
+            href={pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn-primary"
             style={{ fontSize: '0.8rem', textDecoration: 'none' }}
           >
-            <Download size={14} />
-            Export CSV
+            <ExternalLink size={14} />
+            Generate PDF Report
           </a>
         </div>
       </div>
@@ -61,11 +66,11 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts 
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.04em' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.04em' }}>
                   SURVEILLANCE COMPLIANCE & SAFETY AUDIT
                 </h3>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  AegisVision AI Surveillance Engine • Automated Security Protocol
+                  SentinelVision AI Surveillance Engine • Automated Security Protocol
                 </p>
               </div>
               <span style={{
@@ -92,15 +97,15 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts 
               gridTemplateColumns: 'repeat(2, 1fr)',
               gap: '12px',
               fontSize: '0.78rem',
-              backgroundColor: 'rgba(8, 12, 20, 0.6)',
+              backgroundColor: 'var(--bg-main)',
               padding: '14px',
               borderRadius: '6px',
               border: '1px solid var(--border-subtle)'
             }}>
-              <div>Session Name: <span style={{ color: '#ffffff', fontWeight: 600 }}>{activeSession?.name || 'N/A'}</span></div>
-              <div>Source Type: <span style={{ color: '#ffffff', fontWeight: 600 }}>{activeSession?.source_type || 'N/A'}</span></div>
-              <div>Framerate / Res: <span style={{ color: '#ffffff', fontWeight: 600 }}>{activeSession?.fps || 25} FPS ({activeSession?.resolution || 'AUTO'})</span></div>
-              <div>Processed Frames: <span style={{ color: '#ffffff', fontWeight: 600 }}>{activeSession?.processed_frames || 0}</span></div>
+              <div>Session Name: <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{activeSession?.name || 'N/A'}</span></div>
+              <div>Source Type: <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{activeSession?.source_type || 'N/A'}</span></div>
+              <div>Framerate / Res: <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{activeSession?.fps || 25} FPS ({activeSession?.resolution || 'AUTO'})</span></div>
+              <div>Processed Frames: <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{activeSession?.processed_frames || 0}</span></div>
             </div>
           </div>
 
@@ -165,10 +170,21 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts 
         {/* Right Column: Download Formats */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="hud-panel" style={{ padding: '18px' }}>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#ffffff', marginBottom: '12px' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>
               DOWNLOAD AUDIT ARTIFACTS
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary"
+                style={{ justifyContent: 'space-between', textDecoration: 'none', fontSize: '0.8rem' }}
+              >
+                <span>Executive Report (.PDF / HTML)</span>
+                <FileText size={14} />
+              </a>
+
               <a
                 href={`/api/analytics/export/csv${activeSession ? `?session_id=${activeSession.id}` : ''}`}
                 download
