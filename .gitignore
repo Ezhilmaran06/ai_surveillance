@@ -48,6 +48,10 @@ uploads/*.mov
 uploads/*.mkv
 uploads/sample_surveillance.mp4
 !uploads/.gitkeep
+*.mp4
+*.avi
+*.mov
+*.mkv
 *.pt
 *.onnx
 *.weights

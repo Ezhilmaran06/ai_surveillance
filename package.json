@@ -1,0 +1,23 @@
+{
+  "name": "sentinelvision-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SentinelVision AI - Real-Time Crowd Surveillance & Spatial Analytics Platform",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "preview": "npm run preview --prefix frontend",
+    "install:frontend": "npm install --prefix frontend",
+    "start:backend": "powershell -Command \"$env:PYTHONPATH='.'; .\\venv\\Scripts\\python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload\""
+  },
+  "keywords": [
+    "ai",
+    "surveillance",
+    "crowd-analytics",
+    "yolo",
+    "react",
+    "fastapi"
+  ],
+  "author": "Ezhilmaran",
+  "license": "MIT"
+}
