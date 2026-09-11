@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments & Secrets
+.env
+.env.local
+*.env
+
+# SQLite & Data
+*.db
+*.sqlite
+*.sqlite3
+data/surveillance.db
+data/*.db
+
+# Media uploads and models
+uploads/*.mp4
+uploads/*.avi
+uploads/*.mov
+uploads/*.mkv
+uploads/sample_surveillance.mp4
+!uploads/.gitkeep
+*.pt
+*.onnx
+*.weights
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.npm
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
