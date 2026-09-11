@@ -65,6 +65,7 @@ class ZoneEngine:
             max_cap = getattr(z, "max_capacity", 5)
             dwell_thresh = getattr(z, "dwell_threshold_seconds", 10.0)
             color = getattr(z, "color", "#06b6d4")
+            is_restricted = getattr(z, "is_restricted", False)
 
             self.zones[name] = {
                 "id": z_id,
@@ -73,7 +74,8 @@ class ZoneEngine:
                 "coordinates": [(float(pt[0]), float(pt[1])) for pt in coords if len(pt) >= 2],
                 "max_capacity": max_cap,
                 "dwell_threshold_seconds": dwell_thresh,
-                "color": color
+                "color": color,
+                "is_restricted": is_restricted
             }
 
     def process(self, active_tracks: List[Dict[str, Any]], current_time: float) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:

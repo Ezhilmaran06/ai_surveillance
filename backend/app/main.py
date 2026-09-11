@@ -34,6 +34,9 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("Application shutting down.")
 
+# Ensure DB schema is up-to-date upon app initialization
+init_db()
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,

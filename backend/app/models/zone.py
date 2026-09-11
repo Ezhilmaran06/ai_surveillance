@@ -13,4 +13,5 @@ class ZoneModel(Base):
     max_capacity = Column(Integer, default=5)
     dwell_threshold_seconds = Column(Float, default=10.0)
     is_active = Column(Boolean, default=True)
+    is_restricted = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)

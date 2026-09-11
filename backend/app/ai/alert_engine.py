@@ -153,4 +153,37 @@ class AlertEngine:
                 "acknowledged": False
             })
 
+        # 5. Restricted Zone Security Intrusion Detection
+        for trk in active_tracks:
+            t_id = trk["track_id"]
+            zones = trk.get("zones", [])
+            for z_name in zones:
+                z_cfg = zone_configs.get(z_name, {})
+                if z_cfg.get("is_restricted", False):
+                    cd_key = ("restricted_entry", f"{z_name}_{t_id}")
+                    if current_time - self.alert_cooldowns.get(cd_key, 0.0) >= max(8.0, self.cooldown_seconds):
+                        self.alert_cooldowns[cd_key] = current_time
+                        alert = AlertModel(
+                            session_id=session_id,
+                            alert_type="restricted_entry",
+                            severity="critical",
+                            zone_name=z_name,
+                            track_id=t_id,
+                            message=f"RESTRICTED AREA BREACH: Unauthorized intrusion by Person #{t_id} inside '{z_name}'"
+                        )
+                        db.add(alert)
+                        db.commit()
+                        db.refresh(alert)
+                        new_alerts.append({
+                            "id": alert.id,
+                            "session_id": session_id,
+                            "alert_type": alert.alert_type,
+                            "severity": alert.severity,
+                            "zone_name": alert.zone_name,
+                            "track_id": alert.track_id,
+                            "message": alert.message,
+                            "timestamp": alert.timestamp.isoformat(),
+                            "acknowledged": False
+                        })
+
         return new_alerts

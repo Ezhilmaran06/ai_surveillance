@@ -23,7 +23,8 @@ def create_zone(zone_in: ZoneCreate, db: Session = Depends(get_db)):
         color=zone_in.color,
         max_capacity=zone_in.max_capacity,
         dwell_threshold_seconds=zone_in.dwell_threshold_seconds,
-        is_active=zone_in.is_active
+        is_active=zone_in.is_active,
+        is_restricted=zone_in.is_restricted
     )
     db.add(zone)
     db.commit()
@@ -81,7 +82,8 @@ def create_default_zones(db: Session = Depends(get_db)):
             color="#f59e0b",
             max_capacity=2,
             dwell_threshold_seconds=8.0,
-            is_active=True
+            is_active=True,
+            is_restricted=True
         ),
         ZoneModel(
             name="Perimeter Tripwire Line 1",
@@ -90,7 +92,8 @@ def create_default_zones(db: Session = Depends(get_db)):
             color="#ef4444",
             max_capacity=999,
             dwell_threshold_seconds=999.0,
-            is_active=True
+            is_active=True,
+            is_restricted=False
         )
     ]
 

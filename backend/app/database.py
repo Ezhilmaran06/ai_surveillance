@@ -18,5 +18,13 @@ def get_db():
         db.close()
 
 def init_db():
+    import sqlalchemy
     from .models import SessionModel, ZoneModel, AlertModel, AnalyticsSummaryModel, TrackRecordModel, SettingModel
     Base.metadata.create_all(bind=engine)
+    # Automatic migration for is_restricted on existing sqlite database
+    with engine.connect() as conn:
+        try:
+            conn.execute(sqlalchemy.text("ALTER TABLE zones ADD COLUMN is_restricted BOOLEAN DEFAULT 0"))
+            conn.commit()
+        except Exception:
+            pass  # Already present

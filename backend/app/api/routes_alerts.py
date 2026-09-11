@@ -41,6 +41,16 @@ def acknowledge_all(db: Session = Depends(get_db)):
     db.commit()
     return {"status": "all_acknowledged"}
 
+@router.delete("/{alert_id}")
+def delete_alert(alert_id: int, db: Session = Depends(get_db)):
+    alert = db.query(AlertModel).filter(AlertModel.id == alert_id).first()
+    if not alert:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Alert not found")
+    db.delete(alert)
+    db.commit()
+    return {"status": "deleted", "alert_id": alert_id}
+
 @router.delete("/clear")
 def clear_alerts(db: Session = Depends(get_db)):
     db.query(AlertModel).delete()
