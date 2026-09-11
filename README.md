@@ -62,38 +62,62 @@ flowchart TB
 
 ---
 
+## Interface Previews
+
+```
++------------------------------------------------------------------------------------------------------------------+
+| SENTINELVISION AI  |  LIVE SESSION: Concourse-North-CCTV  |  FPS: 30.0  |  LATENCY: 18.2ms  |  HEALTH: ONLINE     |
++------------------------------------------------------------------------------------------------------------------+
+| [Dashboard]   |  PEOPLE: 14   PEAK: 22   AVG: 11.4   DENSITY: 0.28 p/m²   IN/OUT: 42/36   ACTIVE ALERTS: 2       |
+| [Monitor]     |  +----------------------------------------------------+  +-------------------------------------+ |
+| [Zones]       |  |  LIVE HUD STREAM (MJPEG / AI OVERLAY)             |  | REAL-TIME FLOW TIMELINE (RECHARTS)  | |
+| [Analytics]   |  |  [Person #12: Walking]   [Person #18: Stationary] |  |   ~~\___/~~~\_______/~~~~           | |
+| [Alerts]      |  |  [🚨 RESTRICTED: Server Vault Intrusion]          |  +-------------------------------------+ |
+| [Sessions]    |  |  [Heatmap Overlay: 70% opacity]                   |  | INCIDENT AUDIT FEED                 | |
+| [Reports]     |  |  [Snapshot] [Fullscreen] [Stream Active]          |  |   [CRITICAL] Restricted Area Breach | |
+| [Settings]    |  +----------------------------------------------------+  |   [WARNING] Overcrowding High       | |
++------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
 ## Core Capabilities & Features
 
 ### 1. Real-Time Vision & Anonymous Multi-Object Tracking
-- **Zero-Biometrics Privacy**: Strictly assigns ephemeral anonymous tokens (e.g. `Person #1`, `Person #17`). No facial recognition, facial landmark vectors, or identity tracking.
-- **Lightweight Inference**: Runs YOLOv8n optimized for standard laptop CPU or CUDA GPU acceleration.
+- **Zero-Biometrics Privacy**: Strictly assigns ephemeral anonymous tokens (e.g. `Person #1`, `Person #17`). No facial recognition, facial landmark vectors, or biometric databases.
+- **Lightweight High-Speed Inference**: Runs YOLOv8n optimized for standard laptop CPU or CUDA GPU acceleration with graceful fallback to OpenCV MOG2.
 - **Persistent Trajectories**: Tracks ground-plane footpoints and movement vectors across frames with missed-detection tolerance.
 - **Movement State Classification**: Rule-based tracking of `STATIONARY`, `WALKING`, `FAST MOVEMENT`, and `UNUSUAL MOVEMENT`.
 
 ### 2. Spatial Perimeter Zones & Virtual Tripwires
 - **Polygon Security Zones**: Ray-casting point-in-polygon algorithm calculating real-time occupancy and capacity compliance.
+- **Restricted Security Areas**: Explicit restricted zone designation that triggers immediate high-priority alerts when an unauthorized person enters.
 - **Virtual Tripwires (Lines)**: 2D vector segment intersection determining directional line crossings (`IN` vs `OUT`).
-- **Interactive Zone Studio**: In-browser vector drawing canvas to create, resize, and configure zone capacities and dwell thresholds.
+- **Interactive Zone Studio**: In-browser vector drawing canvas to create, resize, rename, activate/deactivate, and configure zone capacities and dwell thresholds.
 
-### 3. Behavioral Crowd Analytics & 2D Heatmaps
+### 3. Behavioral Crowd Analytics & Dual-Mode Heatmaps
 - **Crowd Congestion Index**: Computes physical density (`people / m²`) based on configured monitored floor area.
 - **Crowd Levels**: Dynamic states (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) with configurable limits.
 - **Loitering & Dwell Detection**: Tracks exact residency duration inside defined security perimeters.
-- **2D Congregational Thermal Heatmap**: Accumulates Gaussian footpoint footprints rendering thermal density hotspots.
+- **Live Video Heatmap Overlay**: Real-time canvas overlay projected directly onto the live surveillance stream with adjustable opacity slider (0.2 - 1.0).
+- **2D Congregational Thermal Heatmap**: Accumulates Gaussian footpoint footprints rendering thermal density hotspots on the Analytics dashboard.
 - **Automated Real Insights**: Generates automated statistical narrative insights from real session data.
 
 ### 4. Alert & Anti-Spam Debounce Engine
 - **Capacity Overload**: Fires warnings or critical alerts when zone or room capacity is breached.
 - **Loitering Alarms**: Flags persons dwelling longer than configured threshold seconds.
-- **Restricted Area Intrusion**: Instant notifications when an unauthorized perimeter is entered.
+- **Restricted Area Intrusion**: Instant critical alarms when an unauthorized perimeter is entered.
 - **Anti-Spam Debounce**: Configurable alert cooldown intervals (e.g. 5s) to eliminate duplicate alert spam.
-- **Web Audio Chimes**: Synthesized soft audio alerts toggled in the interface.
+- **Instant Floating Toast & Audio Chimes**: Web Audio synthesized soft chimes and non-intrusive floating toast notifications with instant triage actions.
 
 ### 5. Professional AI Command Center UI
 - **Dual Theme Support**: Dark AI Operations Command Center (default) and crisp Light Mode with persistent preference.
 - **Overview Dashboard**: Hero KPI metrics, live mini-monitor, real-time Recharts flow curves, zone occupancy bars, and incident feed.
-- **Live Monitor Page**: Large video canvas overlay, latency HUD (FPS & inference latency in ms), snapshot capture, and overlay controls.
-- **Compliance & Audit Reports**: Executive printable PDF reports with `@media print` optimization, CSV data summaries, and raw JSON telemetry.
+- **Live Monitor Page**: Large video canvas overlay, latency HUD (FPS & inference latency in ms), frame snapshot capture, native fullscreen toggle, and overlay toggles.
+- **Forensic Frame Capture**: Instant forensic screenshot downloads with precise frame timestamps and bounding box metadata.
+- **System Diagnostics Modal**: Interactive health inspector displaying real-time FastAPI, SQLite, AI engine device (CPU/CUDA), and WebSocket connectivity statuses.
+- **Session Management**: Full lifecycle management table with Peak crowd, Average crowd, Total Alerts, Directional Entries/Exits, Duration, and seamless multi-page drill-downs.
+- **Multi-Format Audit Reports**: Direct downloads for Executive PDF (print-optimized), CSV data summaries, and raw JSON telemetry.
 
 ---
 
