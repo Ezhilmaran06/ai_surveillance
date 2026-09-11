@@ -1,13 +1,7 @@
 import React from 'react';
 import { FileText, Download, Printer, ShieldCheck, Lock, ExternalLink } from 'lucide-react';
-import { Session, Alert } from '../types';
 
-interface ReportsPageProps {
-  activeSession: Session | null;
-  alerts: Alert[];
-}
-
-export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts }) => {
+export const ReportsPage = ({ activeSession, alerts }) => {
   const criticalCount = alerts.filter((a) => a.severity === 'critical').length;
   const warningCount = alerts.filter((a) => a.severity === 'warning').length;
   const infoCount = alerts.filter((a) => a.severity === 'info').length;

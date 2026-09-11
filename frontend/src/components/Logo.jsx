@@ -1,11 +1,6 @@
 import React from 'react';
 
-interface LogoProps {
-  size?: number;
-  showText?: boolean;
-}
-
-export const Logo: React.FC<LogoProps> = ({ size = 32, showText = true }) => {
+export const Logo = ({ size = 32, showText = true }) => {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <svg

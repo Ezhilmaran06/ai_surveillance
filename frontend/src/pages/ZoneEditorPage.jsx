@@ -1,29 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Layers, Plus, Trash2, Edit2, Check, RefreshCw, ShieldAlert, Eye, EyeOff, X, Save, AlertCircle } from 'lucide-react';
-import { Zone, Session } from '../types';
 import { api } from '../services/api';
 
-interface ZoneEditorPageProps {
-  zones: Zone[];
-  onZonesChanged: () => void;
-  activeSession: Session | null;
-}
-
-export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
-  zones,
+export const ZoneEditorPage = ({
+  zones = [],
   onZonesChanged,
   activeSession
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [drawingMode, setDrawingMode] = useState<'polygon' | 'line' | null>(null);
-  const [currentPoints, setCurrentPoints] = useState<[number, number][]>([]);
-  const [newZoneName, setNewZoneName] = useState<string>('');
-  const [newZoneColor, setNewZoneColor] = useState<string>('#06b6d4');
-  const [newCapacity, setNewCapacity] = useState<number>(4);
-  const [newDwellLimit, setNewDwellLimit] = useState<number>(10);
-  const [isRestricted, setIsRestricted] = useState<boolean>(false);
-  const [editingZone, setEditingZone] = useState<Zone | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const canvasRef = useRef(null);
+  const [drawingMode, setDrawingMode] = useState(null);
+  const [currentPoints, setCurrentPoints] = useState([]);
+  const [newZoneName, setNewZoneName] = useState('');
+  const [newZoneColor, setNewZoneColor] = useState('#06b6d4');
+  const [newCapacity, setNewCapacity] = useState(4);
+  const [newDwellLimit, setNewDwellLimit] = useState(10);
+  const [isRestricted, setIsRestricted] = useState(false);
+  const [editingZone, setEditingZone] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redraw canvas with zones
   useEffect(() => {
@@ -55,7 +48,7 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
     // Draw existing saved zones
     zones.forEach((z) => {
       try {
-        const pts: [number, number][] = JSON.parse(z.coordinates_json);
+        const pts = JSON.parse(z.coordinates_json);
         if (pts.length < 2) return;
 
         const isInactive = !z.is_active;
@@ -124,7 +117,7 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
     }
   }, [zones, currentPoints]);
 
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasClick = (e) => {
     if (!drawingMode) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -133,7 +126,7 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
     const x = Math.round(e.clientX - rect.left);
     const y = Math.round(e.clientY - rect.top);
 
-    const updated = [...currentPoints, [x, y] as [number, number]];
+    const updated = [...currentPoints, [x, y]];
     setCurrentPoints(updated);
 
     // Auto complete if target points reached
@@ -144,7 +137,7 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
     }
   };
 
-  const finalizeZone = async (pts: [number, number][], type: 'polygon' | 'line') => {
+  const finalizeZone = async (pts, type) => {
     if (pts.length < 2) return;
     setIsSubmitting(true);
     try {
@@ -171,7 +164,7 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
     }
   };
 
-  const handleToggleActive = async (z: Zone) => {
+  const handleToggleActive = async (z) => {
     try {
       await api.updateZone(z.id, { is_active: !z.is_active });
       onZonesChanged();
@@ -198,7 +191,7 @@ export const ZoneEditorPage: React.FC<ZoneEditorPageProps> = ({
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id) => {
     try {
       await api.deleteZone(id);
       onZonesChanged();

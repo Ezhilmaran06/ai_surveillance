@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Radio, Bell, Sun, Moon, Volume2, VolumeX, Cpu, Zap, Activity, CheckCircle2, ShieldCheck, X, Server } from 'lucide-react';
-import { Logo } from './Logo';
-import { TelemetryFrame } from '../types';
+import { Bell, Sun, Moon, Volume2, VolumeX, Zap, Activity, CheckCircle2, ShieldCheck, X, Server } from 'lucide-react';
+import { Logo } from './Logo.jsx';
 
-interface HeaderProps {
-  isConnected: boolean;
-  telemetry: TelemetryFrame | null;
-  activeSessionName?: string;
-  onAcknowledgeAll?: () => void;
-  isAudioEnabled?: boolean;
-  onToggleAudio?: () => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({
+export const Header = ({
   isConnected,
   telemetry,
   activeSessionName,
@@ -20,7 +10,7 @@ export const Header: React.FC<HeaderProps> = ({
   isAudioEnabled = true,
   onToggleAudio
 }) => {
-  const [isLightMode, setIsLightMode] = useState<boolean>(() => {
+  const [isLightMode, setIsLightMode] = useState(() => {
     return localStorage.getItem('sentinel_theme') === 'light';
   });
 
@@ -38,8 +28,8 @@ export const Header: React.FC<HeaderProps> = ({
     setIsLightMode((prev) => !prev);
   };
 
-  const [showHealthModal, setShowHealthModal] = useState<boolean>(false);
-  const [healthData, setHealthData] = useState<any>(null);
+  const [showHealthModal, setShowHealthModal] = useState(false);
+  const [healthData, setHealthData] = useState(null);
 
   const fetchHealth = async () => {
     try {
@@ -188,18 +178,6 @@ export const Header: React.FC<HeaderProps> = ({
         >
           {isLightMode ? <Moon size={16} color="#0284c7" /> : <Sun size={16} color="#f59e0b" />}
         </button>
-
-        <div style={{
-          fontSize: '0.7rem',
-          color: 'var(--text-muted)',
-          borderLeft: '1px solid var(--border-subtle)',
-          paddingLeft: '12px',
-          display: 'none',
-          lineHeight: '1.4'
-        }}>
-          <div>ANONYMOUS: <span style={{ color: 'var(--status-green)' }}>ACTIVE</span></div>
-          <div>BIOMETRICS: <span style={{ color: 'var(--status-amber)' }}>OFF</span></div>
-        </div>
       </div>
 
       {/* System Health Diagnostics Modal */}

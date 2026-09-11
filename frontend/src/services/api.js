@@ -1,5 +1,3 @@
-import { Session, Zone, Alert, AnalyticsRecord, HeatmapPoint } from '../types';
-
 const API_BASE = '/api';
 
 export const api = {
@@ -10,12 +8,12 @@ export const api = {
   },
 
   // Sessions
-  getSessions: async (): Promise<Session[]> => {
+  getSessions: async () => {
     const res = await fetch(`${API_BASE}/sessions`);
     return res.json();
   },
 
-  uploadVideo: async (file: File): Promise<Session> => {
+  uploadVideo: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
     const res = await fetch(`${API_BASE}/sessions/upload`, {
@@ -29,43 +27,43 @@ export const api = {
     return res.json();
   },
 
-  createWebcamSession: async (): Promise<Session> => {
+  createWebcamSession: async () => {
     const res = await fetch(`${API_BASE}/sessions/webcam`, { method: 'POST' });
     return res.json();
   },
 
-  createSampleSession: async (): Promise<Session> => {
+  createSampleSession: async () => {
     const res = await fetch(`${API_BASE}/sessions/sample`, { method: 'POST' });
     return res.json();
   },
 
-  startSession: async (sessionId: number) => {
+  startSession: async (sessionId) => {
     const res = await fetch(`${API_BASE}/sessions/${sessionId}/start`, { method: 'POST' });
     return res.json();
   },
 
-  pauseSession: async (sessionId: number) => {
+  pauseSession: async (sessionId) => {
     const res = await fetch(`${API_BASE}/sessions/${sessionId}/pause`, { method: 'POST' });
     return res.json();
   },
 
-  stopSession: async (sessionId: number) => {
+  stopSession: async (sessionId) => {
     const res = await fetch(`${API_BASE}/sessions/${sessionId}/stop`, { method: 'POST' });
     return res.json();
   },
 
-  deleteSession: async (sessionId: number) => {
+  deleteSession: async (sessionId) => {
     const res = await fetch(`${API_BASE}/sessions/${sessionId}`, { method: 'DELETE' });
     return res.json();
   },
 
   // Zones
-  getZones: async (): Promise<Zone[]> => {
+  getZones: async () => {
     const res = await fetch(`${API_BASE}/zones`);
     return res.json();
   },
 
-  createZone: async (zone: Partial<Zone>): Promise<Zone> => {
+  createZone: async (zone) => {
     const res = await fetch(`${API_BASE}/zones`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -74,7 +72,7 @@ export const api = {
     return res.json();
   },
 
-  updateZone: async (id: number, zone: Partial<Zone>): Promise<Zone> => {
+  updateZone: async (id, zone) => {
     const res = await fetch(`${API_BASE}/zones/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -83,7 +81,7 @@ export const api = {
     return res.json();
   },
 
-  deleteZone: async (id: number) => {
+  deleteZone: async (id) => {
     const res = await fetch(`${API_BASE}/zones/${id}`, { method: 'DELETE' });
     return res.json();
   },
@@ -94,7 +92,7 @@ export const api = {
   },
 
   // Alerts
-  getAlerts: async (sessionId?: number, limit = 100): Promise<Alert[]> => {
+  getAlerts: async (sessionId, limit = 100) => {
     const url = sessionId
       ? `${API_BASE}/alerts?session_id=${sessionId}&limit=${limit}`
       : `${API_BASE}/alerts?limit=${limit}`;
@@ -102,7 +100,7 @@ export const api = {
     return res.json();
   },
 
-  acknowledgeAlert: async (alertId: number): Promise<Alert> => {
+  acknowledgeAlert: async (alertId) => {
     const res = await fetch(`${API_BASE}/alerts/${alertId}/acknowledge`, { method: 'POST' });
     return res.json();
   },
@@ -112,7 +110,7 @@ export const api = {
     return res.json();
   },
 
-  deleteAlert: async (alertId: number) => {
+  deleteAlert: async (alertId) => {
     const res = await fetch(`${API_BASE}/alerts/${alertId}`, { method: 'DELETE' });
     return res.json();
   },
@@ -123,7 +121,7 @@ export const api = {
   },
 
   // Analytics
-  getAnalyticsHistory: async (sessionId?: number): Promise<AnalyticsRecord[]> => {
+  getAnalyticsHistory: async (sessionId) => {
     const url = sessionId
       ? `${API_BASE}/analytics/history?session_id=${sessionId}`
       : `${API_BASE}/analytics/history`;
@@ -131,12 +129,12 @@ export const api = {
     return res.json();
   },
 
-  getHeatmapPoints: async (): Promise<HeatmapPoint[]> => {
+  getHeatmapPoints: async () => {
     const res = await fetch(`${API_BASE}/analytics/heatmap`);
     return res.json();
   },
 
-  getInsights: async (sessionId?: number) => {
+  getInsights: async (sessionId) => {
     const url = sessionId
       ? `${API_BASE}/analytics/insights?session_id=${sessionId}`
       : `${API_BASE}/analytics/insights`;
@@ -150,7 +148,7 @@ export const api = {
     return res.json();
   },
 
-  updateSettings: async (settings: Record<string, any>) => {
+  updateSettings: async (settings) => {
     const res = await fetch(`${API_BASE}/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

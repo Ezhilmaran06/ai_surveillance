@@ -1,16 +1,6 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subValue?: string;
-  icon: LucideIcon;
-  color?: string;
-  trend?: 'up' | 'down' | 'neutral';
-}
-
-export const StatCard: React.FC<StatCardProps> = ({
+export const StatCard = ({
   title,
   value,
   subValue,

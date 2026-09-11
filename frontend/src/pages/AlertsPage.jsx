@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Check, CheckCheck, Trash2, Search, Filter, ShieldAlert } from 'lucide-react';
-import { Alert } from '../types';
-import { api } from '../services/api';
+import { Check, CheckCheck, Trash2, Search, ShieldAlert } from 'lucide-react';
+import { api } from '../services/api.js';
 
-export const AlertsPage: React.FC = () => {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [filterSeverity, setFilterSeverity] = useState<string>('all');
-  const [filterUnackOnly, setFilterUnackOnly] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+export const AlertsPage = () => {
+  const [alerts, setAlerts] = useState([]);
+  const [filterSeverity, setFilterSeverity] = useState('all');
+  const [filterUnackOnly, setFilterUnackOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchAlerts = async () => {
     setIsLoading(true);
@@ -28,7 +27,7 @@ export const AlertsPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleAcknowledge = async (id: number) => {
+  const handleAcknowledge = async (id) => {
     try {
       await api.acknowledgeAlert(id);
       fetchAlerts();
@@ -46,7 +45,7 @@ export const AlertsPage: React.FC = () => {
     }
   };
 
-  const handleDeleteAlert = async (id: number) => {
+  const handleDeleteAlert = async (id) => {
     try {
       await api.deleteAlert(id);
       fetchAlerts();

@@ -1,28 +1,19 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Camera, Play, Trash2, Video, Film, CheckCircle2, AlertCircle, BarChart2, FileText, Eye, ExternalLink } from 'lucide-react';
-import { Session } from '../types';
-import { api } from '../services/api';
+import { Upload, Camera, Play, Trash2, Film, AlertCircle, BarChart2, FileText, Eye } from 'lucide-react';
+import { api } from '../services/api.js';
 
-interface SessionsPageProps {
-  sessions: Session[];
-  activeSession: Session | null;
-  onSelectSession: (session: Session) => void;
-  onRefreshSessions: () => void;
-  onNavigateToTab?: (tab: 'monitor' | 'analytics' | 'reports') => void;
-}
-
-export const SessionsPage: React.FC<SessionsPageProps> = ({
+export const SessionsPage = ({
   sessions,
   activeSession,
   onSelectSession,
   onRefreshSessions,
   onNavigateToTab
 }) => {
-  const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const fileInputRef = useRef(null);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -32,7 +23,7 @@ export const SessionsPage: React.FC<SessionsPageProps> = ({
       const newSession = await api.uploadVideo(file);
       onRefreshSessions();
       onSelectSession(newSession);
-    } catch (err: any) {
+    } catch (err) {
       setUploadError(err.message || 'Video upload failed');
     } finally {
       setIsUploading(false);
@@ -46,7 +37,7 @@ export const SessionsPage: React.FC<SessionsPageProps> = ({
       const sess = await api.createSampleSession();
       onRefreshSessions();
       onSelectSession(sess);
-    } catch (e: any) {
+    } catch (e) {
       setUploadError(e.message);
     } finally {
       setIsUploading(false);
@@ -59,14 +50,14 @@ export const SessionsPage: React.FC<SessionsPageProps> = ({
       const sess = await api.createWebcamSession();
       onRefreshSessions();
       onSelectSession(sess);
-    } catch (e: any) {
+    } catch (e) {
       setUploadError(e.message);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id) => {
     if (confirm('Delete this surveillance session?')) {
       try {
         await api.deleteSession(id);
@@ -77,7 +68,7 @@ export const SessionsPage: React.FC<SessionsPageProps> = ({
     }
   };
 
-  const handleStart = async (sess: Session) => {
+  const handleStart = async (sess) => {
     try {
       await api.startSession(sess.id);
       onSelectSession(sess);

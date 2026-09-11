@@ -10,42 +10,31 @@ import {
   Clock,
   Video,
   ShieldAlert,
-  Sliders,
   Maximize2,
   Minimize2,
   Camera,
-  Flame,
-  Download
+  Flame
 } from 'lucide-react';
-import { StatCard } from '../components/StatCard';
-import { TelemetryFrame, Session } from '../types';
-import { api } from '../services/api';
+import { StatCard } from '../components/StatCard.jsx';
+import { api } from '../services/api.js';
 
-interface LiveMonitorPageProps {
-  telemetry: TelemetryFrame | null;
-  activeSession: Session | null;
-  sessions: Session[];
-  onSelectSession: (session: Session) => void;
-  onRefreshSessions: () => void;
-}
-
-export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
+export const LiveMonitorPage = ({
   telemetry,
   activeSession,
   sessions,
   onSelectSession,
   onRefreshSessions
 }) => {
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [showZones, setShowZones] = useState<boolean>(true);
-  const [showTrajectories, setShowTrajectories] = useState<boolean>(true);
-  const [showHeatmap, setShowHeatmap] = useState<boolean>(false);
-  const [heatmapOpacity, setHeatmapOpacity] = useState<number>(0.65);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [showZones, setShowZones] = useState(true);
+  const [showTrajectories, setShowTrajectories] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [heatmapOpacity, setHeatmapOpacity] = useState(0.65);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const videoContainerRef = useRef<HTMLDivElement | null>(null);
-  const streamImgRef = useRef<HTMLImageElement | null>(null);
-  const heatmapCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const videoContainerRef = useRef(null);
+  const streamImgRef = useRef(null);
+  const heatmapCanvasRef = useRef(null);
 
   const handleSnapshot = () => {
     if (!streamImgRef.current) return;
@@ -85,7 +74,7 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
   const occupancies = telemetry?.zone_occupancies ?? {};
   const recentAlerts = telemetry?.recent_alerts ?? [];
 
-  const handleStartSession = async (sess: Session) => {
+  const handleStartSession = async (sess) => {
     try {
       await api.startSession(sess.id);
       setIsPlaying(true);
@@ -274,8 +263,7 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
                     display: 'block'
                   }}
                   onError={(e) => {
-                    // Fallback if backend server stream is restarting
-                    (e.target as HTMLImageElement).style.opacity = '0.7';
+                    e.target.style.opacity = '0.7';
                   }}
                 />
                 {showHeatmap && (

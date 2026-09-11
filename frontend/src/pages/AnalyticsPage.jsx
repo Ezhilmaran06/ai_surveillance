@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  BarChart3,
   Flame,
   Download,
   RefreshCw,
@@ -8,13 +7,11 @@ import {
   Clock,
   ArrowRightLeft,
   Sparkles,
-  Layers,
   FileText
 } from 'lucide-react';
 import {
   AreaChart,
   Area,
-  LineChart,
   Line,
   BarChart,
   Bar,
@@ -25,20 +22,15 @@ import {
   CartesianGrid,
   Legend
 } from 'recharts';
-import { AnalyticsRecord, HeatmapPoint, Session } from '../types';
-import { api } from '../services/api';
+import { api } from '../services/api.js';
 
-interface AnalyticsPageProps {
-  activeSession: Session | null;
-}
-
-export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ activeSession }) => {
-  const [history, setHistory] = useState<AnalyticsRecord[]>([]);
-  const [heatmapPoints, setHeatmapPoints] = useState<HeatmapPoint[]>([]);
-  const [insights, setInsights] = useState<string[]>([]);
-  const [timeFilter, setTimeFilter] = useState<'all' | '5m' | '15m' | '30m'>('all');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const heatmapCanvasRef = useRef<HTMLCanvasElement | null>(null);
+export const AnalyticsPage = ({ activeSession }) => {
+  const [history, setHistory] = useState([]);
+  const [heatmapPoints, setHeatmapPoints] = useState([]);
+  const [insights, setInsights] = useState([]);
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [isLoading, setIsLoading] = useState(false);
+  const heatmapCanvasRef = useRef(null);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -120,7 +112,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ activeSession }) =
   }, [heatmapPoints]);
 
   // Filter history records based on time filter
-  const filteredHistory = React.useMemo(() => {
+  const filteredHistory = useMemo(() => {
     if (timeFilter === '5m') return history.slice(-20);
     if (timeFilter === '15m') return history.slice(-60);
     if (timeFilter === '30m') return history.slice(-120);
@@ -173,7 +165,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ activeSession }) =
             border: '1px solid var(--border-subtle)',
             fontSize: '0.75rem'
           }}>
-            {(['all', '30m', '15m', '5m'] as const).map((tf) => (
+            {['all', '30m', '15m', '5m'].map((tf) => (
               <button
                 key={tf}
                 onClick={() => setTimeFilter(tf)}

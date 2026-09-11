@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   TrendingUp,
@@ -10,12 +10,7 @@ import {
   Video,
   Layers,
   ShieldAlert,
-  Clock,
-  Zap,
-  Activity,
-  ArrowRightLeft,
-  BarChart3,
-  Play
+  ArrowRightLeft
 } from 'lucide-react';
 import {
   AreaChart,
@@ -26,23 +21,11 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid,
-  Legend
+  CartesianGrid
 } from 'recharts';
-import { StatCard } from '../components/StatCard';
-import { TelemetryFrame, Session, Zone, Alert } from '../types';
+import { StatCard } from '../components/StatCard.jsx';
 
-interface DashboardPageProps {
-  telemetry: TelemetryFrame | null;
-  activeSession: Session | null;
-  zones: Zone[];
-  alerts: Alert[];
-  onNavigateToMonitor: () => void;
-  onNavigateToZones: () => void;
-  onNavigateToAlerts: () => void;
-}
-
-export const DashboardPage: React.FC<DashboardPageProps> = ({
+export const DashboardPage = ({
   telemetry,
   activeSession,
   zones,
@@ -58,7 +41,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const activeAlertsCount = alerts.filter(a => !a.acknowledged).length;
 
   // Custom Glassmorphic Recharts Tooltip
-  const GlassTooltip = ({ active, payload, label }: any) => {
+  const GlassTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div style={{
@@ -71,7 +54,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           fontSize: '0.78rem'
         }}>
           <div style={{ color: 'var(--text-muted)', marginBottom: '4px', fontFamily: 'var(--font-mono)' }}>{label}</div>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index) => (
             <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: entry.color || '#ffffff' }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: entry.color }} />
               <span style={{ fontWeight: 600 }}>{entry.name}:</span>
@@ -85,9 +68,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   };
 
   // Real-time chart data points from telemetry or historical buffer
-  const [timelineData, setTimelineData] = useState<Array<{ time: string; count: number; density: number }>>([]);
+  const [timelineData, setTimelineData] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!telemetry) return;
     const nowStr = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     setTimelineData(prev => {
@@ -196,7 +179,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 alt="Live AI Surveillance Feed"
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
+                  e.target.style.display = 'none';
                 }}
               />
             ) : (

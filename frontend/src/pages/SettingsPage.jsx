@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Settings, Save, ShieldCheck, Cpu, Sliders, CheckCircle } from 'lucide-react';
 import { api } from '../services/api';
 
-export const SettingsPage: React.FC = () => {
-  const [settings, setSettings] = useState<Record<string, any>>({
+export const SettingsPage = () => {
+  const [settings, setSettings] = useState({
     yolo_model: 'yolov8n.pt',
     confidence: 0.35,
     iou: 0.45,
@@ -13,8 +13,8 @@ export const SettingsPage: React.FC = () => {
     privacy_mode: 'Anonymous Trackers Only',
     hardware_acceleration: 'Auto (CUDA if present, else CPU)'
   });
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
 
   useEffect(() => {
     api.getSettings().then((data) => {

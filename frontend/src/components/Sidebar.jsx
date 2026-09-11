@@ -8,32 +8,23 @@ import {
   FileVideo,
   FileText,
   Settings,
-  Flame,
   ShieldCheck
 } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'monitor' | 'zones' | 'analytics' | 'alerts' | 'sessions' | 'reports' | 'settings';
-
-interface SidebarProps {
-  activeTab: TabType;
-  onTabChange: (tab: TabType) => void;
-  unacknowledgedAlertsCount?: number;
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({
+export const Sidebar = ({
   activeTab,
   onTabChange,
   unacknowledgedAlertsCount = 0
 }) => {
   const navItems = [
-    { id: 'dashboard' as TabType, label: 'Overview Dashboard', icon: LayoutDashboard },
-    { id: 'monitor' as TabType, label: 'Live Monitor', icon: Video },
-    { id: 'analytics' as TabType, label: 'Crowd Analytics', icon: BarChart3 },
-    { id: 'zones' as TabType, label: 'Perimeter Zones', icon: Layers },
-    { id: 'alerts' as TabType, label: 'Security Alerts', icon: AlertTriangle, badge: unacknowledgedAlertsCount },
-    { id: 'sessions' as TabType, label: 'Video Sessions', icon: FileVideo },
-    { id: 'reports' as TabType, label: 'Reports & Export', icon: FileText },
-    { id: 'settings' as TabType, label: 'System Settings', icon: Settings },
+    { id: 'dashboard', label: 'Overview Dashboard', icon: LayoutDashboard },
+    { id: 'monitor', label: 'Live Monitor', icon: Video },
+    { id: 'analytics', label: 'Crowd Analytics', icon: BarChart3 },
+    { id: 'zones', label: 'Perimeter Zones', icon: Layers },
+    { id: 'alerts', label: 'Security Alerts', icon: AlertTriangle, badge: unacknowledgedAlertsCount },
+    { id: 'sessions', label: 'Video Sessions', icon: FileVideo },
+    { id: 'reports', label: 'Reports & Export', icon: FileText },
+    { id: 'settings', label: 'System Settings', icon: Settings },
   ];
 
   return (

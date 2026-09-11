@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { TelemetryFrame } from '../types';
 
 export function useSurveillanceWebSocket() {
-  const [telemetry, setTelemetry] = useState<TelemetryFrame | null>(null);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
+  const [telemetry, setTelemetry] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const wsRef = useRef(null);
+  const reconnectTimeoutRef = useRef(null);
 
   useEffect(() => {
     let unmounted = false;
@@ -61,7 +60,7 @@ export function useSurveillanceWebSocket() {
     };
   }, []);
 
-  const sendCommand = (action: string, payload: any = {}) => {
+  const sendCommand = (action, payload = {}) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ action, ...payload }));
     }

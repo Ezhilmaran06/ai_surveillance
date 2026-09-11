@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
-import { Sidebar, TabType } from './components/Sidebar';
+import { Sidebar } from './components/Sidebar';
 import { DashboardPage } from './pages/DashboardPage';
 import { LiveMonitorPage } from './pages/LiveMonitorPage';
 import { ZoneEditorPage } from './pages/ZoneEditorPage';
@@ -10,21 +10,20 @@ import { SessionsPage } from './pages/SessionsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { useSurveillanceWebSocket } from './hooks/useSurveillanceWebSocket';
-import { Session, Zone, Alert } from './types';
 import { api } from './services/api';
 
-export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [activeSession, setActiveSession] = useState<Session | null>(null);
-  const [zones, setZones] = useState<Zone[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [toastAlert, setToastAlert] = useState<Alert | null>(null);
-  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(() => {
+export const App = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [sessions, setSessions] = useState([]);
+  const [activeSession, setActiveSession] = useState(null);
+  const [zones, setZones] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [toastAlert, setToastAlert] = useState(null);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(() => {
     return localStorage.getItem('sentinel_audio') !== 'false';
   });
 
-  const prevAlertCountRef = useRef<number>(0);
+  const prevAlertCountRef = useRef(0);
 
   const { telemetry, isConnected } = useSurveillanceWebSocket();
 
@@ -32,7 +31,7 @@ export const App: React.FC = () => {
   const playAlertChime = () => {
     if (!isAudioEnabled) return;
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return;
       const ctx = new AudioContextClass();
       const osc = ctx.createOscillator();
