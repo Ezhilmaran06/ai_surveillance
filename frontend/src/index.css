@@ -1,15 +1,19 @@
 :root {
-  --bg-main: #080c14;
-  --bg-card: #0d1322;
-  --bg-card-hover: #131b2e;
-  --bg-panel: #111827;
-  --border-subtle: #1e293b;
+  --bg-main: #060913;
+  --bg-card: rgba(13, 19, 35, 0.72);
+  --bg-card-solid: #0d1323;
+  --bg-card-hover: rgba(20, 29, 52, 0.88);
+  --bg-panel: rgba(10, 15, 29, 0.88);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glass: rgba(255, 255, 255, 0.12);
   --border-accent: #0284c7;
+  
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
   --accent-cyan: #06b6d4;
+  --accent-cyan-glow: rgba(6, 182, 212, 0.25);
   --accent-blue: #38bdf8;
   --accent-indigo: #6366f1;
   --status-green: #10b981;
@@ -18,26 +22,36 @@
 
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  --shadow-card: 0 8px 32px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  --shadow-glow-cyan: 0 0 24px rgba(6, 182, 212, 0.2);
 }
 
 /* Optional Light Mode Theme */
 body.light-theme {
-  --bg-main: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --bg-panel: #f8fafc;
-  --border-subtle: #cbd5e1;
+  --bg-main: #f4f6fa;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-solid: #ffffff;
+  --bg-card-hover: #ffffff;
+  --bg-panel: rgba(255, 255, 255, 0.92);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-glass: rgba(0, 0, 0, 0.12);
   --border-accent: #0284c7;
+  
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #64748b;
 
   --accent-cyan: #0284c7;
+  --accent-cyan-glow: rgba(2, 132, 199, 0.2);
   --accent-blue: #0ea5e9;
   --accent-indigo: #4f46e5;
   --status-green: #16a34a;
   --status-amber: #d97706;
   --status-red: #dc2626;
+
+  --shadow-card: 0 8px 24px -4px rgba(0, 0, 0, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --shadow-glow-cyan: 0 0 20px rgba(2, 132, 199, 0.15);
 }
 
 * {
@@ -48,6 +62,13 @@ body.light-theme {
 
 body {
   background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(circle at 12% 8%, rgba(6, 182, 212, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 88% 92%, rgba(99, 102, 241, 0.05) 0%, transparent 45%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -78,22 +99,41 @@ body {
 /* Glass & Glow utilities */
 .hud-panel {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
 }
 
 .hud-panel:hover {
-  border-color: rgba(6, 182, 212, 0.35);
+  border-color: rgba(6, 182, 212, 0.32);
+  box-shadow: 0 12px 40px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
 }
 
 .glow-cyan {
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.18);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.22);
 }
 
 .glow-red {
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.28);
+}
+
+/* Cyber Badge */
+.cyber-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
 }
 
 /* Pulse animation for live badge */
@@ -101,44 +141,64 @@ body {
   0%, 100% {
     opacity: 1;
     transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   }
   50% {
-    opacity: 0.4;
+    opacity: 0.6;
     transform: scale(1.15);
+    box-shadow: 0 0 8px 3px rgba(239, 68, 68, 0.4);
+  }
+}
+
+@keyframes green-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 8px 3px rgba(16, 185, 129, 0.3);
   }
 }
 
 .live-dot {
   width: 8px;
   height: 8px;
-  background-color: #ef4444;
+  background-color: var(--status-red);
   border-radius: 50%;
   display: inline-block;
-  animation: live-pulse 1.6s infinite ease-in-out;
+  animation: live-pulse 1.8s infinite ease-in-out;
 }
 
 .live-dot.active-green {
   background-color: var(--status-green);
+  animation: green-pulse 1.8s infinite ease-in-out;
 }
 
 /* Buttons */
 .btn-primary {
   background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
   color: #ffffff;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(6, 182, 212, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-primary:hover {
-  filter: brightness(1.12);
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(6, 182, 212, 0.4);
+  filter: brightness(1.1);
+}
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-secondary {
@@ -146,18 +206,21 @@ body {
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
   padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-secondary:hover {
   background: var(--bg-card-hover);
-  border-color: var(--accent-cyan);
+  border-color: rgba(6, 182, 212, 0.4);
+  color: var(--accent-cyan);
+  transform: translateY(-1px);
 }
 
 .btn-danger {

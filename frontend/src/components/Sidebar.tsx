@@ -72,31 +72,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
               justifyContent: 'space-between',
               width: '100%',
               padding: '10px 14px',
-              borderRadius: '6px',
-              border: 'none',
-              background: isActive ? 'rgba(6, 182, 212, 0.14)' : 'transparent',
-              color: isActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+              borderRadius: '8px',
+              border: isActive ? '1px solid rgba(6, 182, 212, 0.35)' : '1px solid transparent',
+              background: isActive
+                ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.16) 0%, rgba(6, 182, 212, 0.04) 100%)'
+                : 'transparent',
+              color: isActive ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: isActive ? 600 : 500,
-              fontSize: '0.85rem',
+              fontSize: '0.84rem',
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              borderLeft: isActive ? '3px solid var(--accent-cyan)' : '3px solid transparent',
-              textAlign: 'left'
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: isActive ? '0 0 16px rgba(6, 182, 212, 0.15)' : 'none',
+              textAlign: 'left',
+              position: 'relative'
             }}
           >
+            {isActive && (
+              <div style={{
+                position: 'absolute',
+                left: '-10px',
+                top: '6px',
+                bottom: '6px',
+                width: '3px',
+                backgroundColor: 'var(--accent-cyan)',
+                borderRadius: '0 3px 3px 0',
+                boxShadow: '0 0 8px var(--accent-cyan)'
+              }} />
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Icon size={18} color={isActive ? 'var(--accent-cyan)' : 'var(--text-muted)'} />
-              <span>{item.label}</span>
+              <span style={{ color: isActive ? 'var(--text-primary)' : 'inherit' }}>{item.label}</span>
             </div>
 
             {Boolean(item.badge && item.badge > 0) && (
               <span style={{
                 backgroundColor: 'var(--status-red)',
                 color: '#ffffff',
-                fontSize: '0.7rem',
+                fontSize: '0.68rem',
                 fontWeight: 700,
-                padding: '1px 6px',
-                borderRadius: '10px'
+                padding: '2px 7px',
+                borderRadius: '9999px',
+                boxShadow: '0 0 8px rgba(239, 68, 68, 0.5)'
               }}>
                 {item.badge}
               </span>
@@ -105,21 +121,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
         );
       })}
 
-      <div style={{ marginTop: 'auto', padding: '14px 10px', borderTop: '1px solid var(--border-subtle)' }}>
+      <div style={{ marginTop: 'auto', padding: '14px 6px 4px', borderTop: '1px solid var(--border-subtle)' }}>
         <div style={{
-          backgroundColor: 'var(--bg-main)',
-          padding: '12px',
-          borderRadius: '8px',
+          backgroundColor: 'rgba(0, 0, 0, 0.25)',
+          padding: '12px 14px',
+          borderRadius: '10px',
           border: '1px solid var(--border-subtle)',
           fontSize: '0.75rem',
           color: 'var(--text-muted)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--status-green)', fontWeight: 600, marginBottom: '6px' }}>
-            <ShieldCheck size={15} />
-            <span>Zero Biometrics</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--status-green)', fontWeight: 700 }}>
+              <span className="live-dot active-green" style={{ width: '6px', height: '6px' }} />
+              <span style={{ fontSize: '0.72rem', letterSpacing: '0.04em' }}>EDGE PRIVACY</span>
+            </div>
+            <span className="font-mono" style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>YOLOv8n</span>
           </div>
-          <div style={{ fontSize: '0.72rem', lineHeight: '1.4' }}>
-            Local edge processing only. Strict ephemeral anonymous person tracking.
+          <div style={{ fontSize: '0.71rem', lineHeight: '1.4', color: 'var(--text-secondary)' }}>
+            Zero biometric capture. Ephemeral tokenization only.
           </div>
         </div>
       </div>

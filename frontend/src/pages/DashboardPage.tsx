@@ -57,6 +57,33 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const exits = telemetry?.exits ?? 0;
   const activeAlertsCount = alerts.filter(a => !a.acknowledged).length;
 
+  // Custom Glassmorphic Recharts Tooltip
+  const GlassTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{
+          backgroundColor: 'rgba(10, 15, 29, 0.94)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(6, 182, 212, 0.4)',
+          borderRadius: '8px',
+          padding: '8px 12px',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
+          fontSize: '0.78rem'
+        }}>
+          <div style={{ color: 'var(--text-muted)', marginBottom: '4px', fontFamily: 'var(--font-mono)' }}>{label}</div>
+          {payload.map((entry: any, index: number) => (
+            <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: entry.color || '#ffffff' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: entry.color }} />
+              <span style={{ fontWeight: 600 }}>{entry.name}:</span>
+              <span className="font-mono" style={{ fontWeight: 700 }}>{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Real-time chart data points from telemetry or historical buffer
   const [timelineData, setTimelineData] = useState<Array<{ time: string; count: number; density: number }>>([]);
 
@@ -80,7 +107,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <StatCard
           title="CURRENT OCCUPANCY"
           value={currentCount}
-          subValue={`Crowd Status: ${currentCount > 15 ? 'HIGH' : currentCount > 8 ? 'MEDIUM' : 'LOW'}`}
+          subValue={`Status: ${currentCount > 15 ? 'HIGH CONGESTION' : currentCount > 8 ? 'MODERATE FLOW' : 'OPTIMAL DENSITY'}`}
           icon={Users}
           color="var(--accent-cyan)"
         />
@@ -94,14 +121,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <StatCard
           title="CROWD DENSITY"
           value={`${(currentCount / 50.0).toFixed(2)} /m²`}
-          subValue="Estimated Area Index"
+          subValue="Estimated Spatial Area"
           icon={Gauge}
           color="var(--accent-indigo)"
         />
         <StatCard
           title="ACTIVE ALERTS"
           value={activeAlertsCount}
-          subValue="Unacknowledged warnings"
+          subValue="Unacknowledged events"
           icon={AlertTriangle}
           color={activeAlertsCount > 0 ? "var(--status-red)" : "var(--status-green)"}
         />
@@ -132,13 +159,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Video size={18} color="var(--accent-cyan)" />
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>Live Optical Feed & Spatial Overlays</h3>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>Optical Sensor Feed & Spatial Overlays</h3>
               <span className="live-dot active-green" style={{ marginLeft: '4px' }} />
             </div>
             <button
               onClick={onNavigateToMonitor}
               className="btn-secondary"
-              style={{ fontSize: '0.78rem', padding: '5px 10px' }}
+              style={{ fontSize: '0.78rem', padding: '5px 12px' }}
             >
               <Maximize2 size={13} />
               <span>Full Screen Monitor</span>
@@ -147,15 +174,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
           <div style={{
             position: 'relative',
-            backgroundColor: '#000000',
-            borderRadius: '8px',
+            backgroundColor: '#030712',
+            borderRadius: '10px',
             overflow: 'hidden',
             aspectRatio: '16/9',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            border: '1px solid var(--border-subtle)'
+            border: '1px solid var(--border-subtle)',
+            boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.8)'
           }}>
+            {/* HUD Corner Brackets */}
+            <div style={{ position: 'absolute', top: '10px', left: '10px', width: '14px', height: '14px', borderTop: '2px solid var(--accent-cyan)', borderLeft: '2px solid var(--accent-cyan)', zIndex: 5, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: '10px', right: '10px', width: '14px', height: '14px', borderTop: '2px solid var(--accent-cyan)', borderRight: '2px solid var(--accent-cyan)', zIndex: 5, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: '10px', left: '10px', width: '14px', height: '14px', borderBottom: '2px solid var(--accent-cyan)', borderLeft: '2px solid var(--accent-cyan)', zIndex: 5, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: '10px', right: '10px', width: '14px', height: '14px', borderBottom: '2px solid var(--accent-cyan)', borderRight: '2px solid var(--accent-cyan)', zIndex: 5, pointerEvents: 'none' }} />
+
             {activeSession ? (
               <img
                 src={`/api/sessions/${activeSession.id}/stream?t=${Date.now()}`}
@@ -175,21 +209,27 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             {/* Quick HUD badge inside video */}
             <div style={{
               position: 'absolute',
-              top: '10px',
-              left: '10px',
-              background: 'rgba(8, 12, 20, 0.75)',
+              top: '16px',
+              left: '16px',
+              background: 'rgba(6, 9, 19, 0.82)',
               backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
+              border: '1px solid rgba(6, 182, 212, 0.35)',
               padding: '4px 10px',
-              borderRadius: '4px',
-              fontSize: '0.75rem',
+              borderRadius: '6px',
+              fontSize: '0.74rem',
               color: 'var(--text-primary)',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '6px',
+              zIndex: 6
             }}>
               <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>OCCUPANCY:</span>
               <span className="font-mono" style={{ fontWeight: 800 }}>{currentCount}</span>
+              <span style={{ color: 'var(--border-subtle)', margin: '0 2px' }}>|</span>
+              <span style={{ color: 'var(--text-muted)' }}>FPS:</span>
+              <span className="font-mono" style={{ color: 'var(--status-green)', fontWeight: 700 }}>
+                {telemetry?.fps ? telemetry.fps.toFixed(1) : '30.0'}
+              </span>
             </div>
           </div>
         </div>
@@ -279,17 +319,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               <AreaChart data={timelineData.length > 0 ? timelineData : [{ time: '00:00', count: 0, density: 0 }]}>
                 <defs>
                   <linearGradient id="countGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.6}/>
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.65}/>
                     <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0}/>
                   </linearGradient>
                 </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
                 <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
                 <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)', borderRadius: '6px', fontSize: '0.8rem' }}
-                  itemStyle={{ color: 'var(--accent-cyan)' }}
-                />
-                <Area type="monotone" dataKey="count" name="People Count" stroke="#06b6d4" strokeWidth={2} fillOpacity={1} fill="url(#countGrad)" />
+                <Tooltip content={<GlassTooltip />} />
+                <Area type="monotone" dataKey="count" name="People Count" stroke="#06b6d4" strokeWidth={2.5} fillOpacity={1} fill="url(#countGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -376,10 +414,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="category" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
                 <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)', borderRadius: '6px', fontSize: '0.8rem' }}
-                />
-                <Bar dataKey="count" name="Persons" radius={[4, 4, 0, 0]} />
+                <Tooltip content={<GlassTooltip />} />
+                <Bar dataKey="count" name="Persons" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -410,10 +446,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="severity" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
                 <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)', borderRadius: '6px', fontSize: '0.8rem' }}
-                />
-                <Bar dataKey="count" name="Incidents" radius={[4, 4, 0, 0]} />
+                <Tooltip content={<GlassTooltip />} />
+                <Bar dataKey="count" name="Incidents" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

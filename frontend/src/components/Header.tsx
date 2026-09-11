@@ -65,9 +65,12 @@ export const Header: React.FC<HeaderProps> = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '10px 24px',
+      padding: '12px 24px',
       backgroundColor: 'var(--bg-panel)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       borderBottom: '1px solid var(--border-subtle)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
       position: 'sticky',
       top: 0,
       zIndex: 50,
@@ -77,15 +80,26 @@ export const Header: React.FC<HeaderProps> = ({
       <Logo size={36} showText={true} />
 
       {/* Center status indicators */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
         {/* Source feed info */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.78rem',
+          backgroundColor: 'rgba(0, 0, 0, 0.25)',
+          padding: '5px 12px',
+          borderRadius: '9999px',
+          border: '1px solid var(--border-subtle)'
+        }}>
           <span className={`live-dot ${isConnected ? 'active-green' : ''}`} />
-          <span style={{ fontWeight: 600, color: isConnected ? 'var(--status-green)' : 'var(--text-muted)' }}>
-            {isConnected ? 'LIVE FEED ACTIVE' : 'RECONNECTING...'}
+          <span style={{ fontWeight: 700, letterSpacing: '0.04em', color: isConnected ? 'var(--status-green)' : 'var(--text-muted)' }}>
+            {isConnected ? 'STREAM ACTIVE' : 'CONNECTING...'}
           </span>
           {activeSessionName && (
-            <span style={{ color: 'var(--text-muted)' }}>• {activeSessionName}</span>
+            <span style={{ color: 'var(--text-muted)', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              • {activeSessionName}
+            </span>
           )}
         </div>
 
@@ -95,20 +109,23 @@ export const Header: React.FC<HeaderProps> = ({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            background: 'rgba(6, 182, 212, 0.12)',
-            border: '1px solid rgba(6, 182, 212, 0.25)',
-            padding: '4px 10px',
-            borderRadius: '6px',
-            fontSize: '0.75rem',
+            gap: '7px',
+            background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(99, 102, 241, 0.12) 100%)',
+            border: '1px solid rgba(6, 182, 212, 0.35)',
+            padding: '5px 12px',
+            borderRadius: '9999px',
+            fontSize: '0.74rem',
             fontWeight: 700,
+            letterSpacing: '0.04em',
             color: 'var(--accent-cyan)',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            boxShadow: '0 0 12px rgba(6, 182, 212, 0.15)',
+            transition: 'all 0.2s ease'
           }}
           title="Click to view System Health Diagnostics"
         >
-          <Zap size={13} />
-          <span>AI ENGINE: ONLINE</span>
+          <Zap size={13} color="var(--accent-cyan)" />
+          <span>NEURAL ENGINE: ONLINE</span>
         </button>
 
         {/* HUD Performance Gauges */}
@@ -116,22 +133,22 @@ export const Header: React.FC<HeaderProps> = ({
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
-          background: 'var(--bg-main)',
+          background: 'rgba(0, 0, 0, 0.35)',
           padding: '5px 12px',
-          borderRadius: '6px',
+          borderRadius: '8px',
           border: '1px solid var(--border-subtle)',
-          fontSize: '0.78rem'
+          fontSize: '0.76rem'
         }}>
           <div>
-            <span style={{ color: 'var(--text-muted)' }}>FPS: </span>
-            <span className="font-mono" style={{ color: fps >= 15 ? 'var(--status-green)' : 'var(--status-amber)', fontWeight: 700 }}>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>FPS </span>
+            <span className="font-mono" style={{ color: fps >= 15 ? 'var(--status-green)' : 'var(--status-amber)', fontWeight: 800 }}>
               {fps.toFixed(1)}
             </span>
           </div>
-          <div style={{ width: '1px', height: '14px', background: 'var(--border-subtle)' }} />
+          <div style={{ width: '1px', height: '12px', background: 'var(--border-subtle)' }} />
           <div>
-            <span style={{ color: 'var(--text-muted)' }}>LATENCY: </span>
-            <span className="font-mono" style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>LATENCY </span>
+            <span className="font-mono" style={{ color: 'var(--accent-cyan)', fontWeight: 800 }}>
               {latency > 0 ? `${latency.toFixed(1)}ms` : '0.0ms'}
             </span>
           </div>

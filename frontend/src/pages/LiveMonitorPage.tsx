@@ -308,16 +308,23 @@ export const LiveMonitorPage: React.FC<LiveMonitorPageProps> = ({
               </div>
             )}
 
+            {/* HUD Corner Brackets */}
+            <div style={{ position: 'absolute', top: '12px', left: '12px', width: '16px', height: '16px', borderTop: '2px solid var(--accent-cyan)', borderLeft: '2px solid var(--accent-cyan)', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: '12px', right: '12px', width: '16px', height: '16px', borderTop: '2px solid var(--accent-cyan)', borderRight: '2px solid var(--accent-cyan)', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: '12px', left: '12px', width: '16px', height: '16px', borderBottom: '2px solid var(--accent-cyan)', borderLeft: '2px solid var(--accent-cyan)', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: '12px', right: '12px', width: '16px', height: '16px', borderBottom: '2px solid var(--accent-cyan)', borderRight: '2px solid var(--accent-cyan)', zIndex: 10, pointerEvents: 'none' }} />
+
             {/* Corner HUD Overlay */}
             <div style={{
               position: 'absolute',
-              top: '12px',
-              left: '12px',
-              background: 'rgba(8, 12, 20, 0.75)',
+              top: '16px',
+              left: '32px',
+              background: 'rgba(6, 9, 19, 0.85)',
               backdropFilter: 'blur(8px)',
-              padding: '6px 12px',
-              borderRadius: '4px',
-              border: '1px solid var(--border-subtle)',
+              padding: '6px 14px',
+              borderRadius: '6px',
+              border: '1px solid rgba(6, 182, 212, 0.3)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
               fontSize: '0.72rem',
               display: 'flex',
               gap: '12px',
