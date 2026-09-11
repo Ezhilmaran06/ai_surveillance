@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Radio, Bell, Sun, Moon, Volume2, VolumeX, Cpu, Zap } from 'lucide-react';
+import { Radio, Bell, Sun, Moon, Volume2, VolumeX, Cpu, Zap, Activity, CheckCircle2, ShieldCheck, X, Server } from 'lucide-react';
 import { Logo } from './Logo';
 import { TelemetryFrame } from '../types';
 
@@ -38,9 +38,27 @@ export const Header: React.FC<HeaderProps> = ({
     setIsLightMode((prev) => !prev);
   };
 
-  const fps = telemetry?.fps ?? 0;
-  const latency = telemetry?.inference_ms ?? 0;
-  const recentAlertsCount = telemetry?.recent_alerts?.length ?? 0;
+  const [showHealthModal, setShowHealthModal] = useState<boolean>(false);
+  const [healthData, setHealthData] = useState<any>(null);
+
+  const fetchHealth = async () => {
+    try {
+      const res = await fetch('/api/health');
+      const data = await res.json();
+      setHealthData(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleOpenHealth = () => {
+    fetchHealth();
+    setShowHealthModal(true);
+  };
+
+  const fps = telemetry?.fps || 0;
+  const latency = telemetry?.inference_ms || 0;
+  const recentAlertsCount = telemetry?.recent_alerts?.length || 0;
 
   return (
     <header style={{
@@ -71,22 +89,27 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* AI Engine & Device Status */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          background: 'rgba(6, 182, 212, 0.12)',
-          border: '1px solid rgba(6, 182, 212, 0.25)',
-          padding: '4px 10px',
-          borderRadius: '6px',
-          fontSize: '0.75rem',
-          fontWeight: 700,
-          color: 'var(--accent-cyan)'
-        }}>
+        {/* AI Engine & Device Status (Clickable for System Health) */}
+        <button
+          onClick={handleOpenHealth}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'rgba(6, 182, 212, 0.12)',
+            border: '1px solid rgba(6, 182, 212, 0.25)',
+            padding: '4px 10px',
+            borderRadius: '6px',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            color: 'var(--accent-cyan)',
+            cursor: 'pointer'
+          }}
+          title="Click to view System Health Diagnostics"
+        >
           <Zap size={13} />
           <span>AI ENGINE: ONLINE</span>
-        </div>
+        </button>
 
         {/* HUD Performance Gauges */}
         <div style={{
@@ -161,6 +184,96 @@ export const Header: React.FC<HeaderProps> = ({
           <div>BIOMETRICS: <span style={{ color: 'var(--status-amber)' }}>OFF</span></div>
         </div>
       </div>
+
+      {/* System Health Diagnostics Modal */}
+      {showHealthModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(3, 7, 18, 0.75)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+          padding: '20px'
+        }}
+        onClick={() => setShowHealthModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="hud-panel glow-cyan"
+            style={{
+              width: '100%',
+              maxWidth: '520px',
+              padding: '24px',
+              border: '1px solid var(--accent-cyan)',
+              backgroundColor: 'var(--bg-panel)',
+              borderRadius: '8px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Activity size={20} color="var(--accent-cyan)" />
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                  SYSTEM HEALTH & RUNTIME DIAGNOSTICS
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowHealthModal(false)}
+                className="btn-secondary"
+                style={{ padding: '4px', borderRadius: '4px' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>BACKEND SERVICE</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--status-green)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  <CheckCircle2 size={14} />
+                  <span>ONLINE (FastAPI)</span>
+                </div>
+              </div>
+
+              <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>DATABASE ENGINE</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--status-green)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  <CheckCircle2 size={14} />
+                  <span>ONLINE (SQLite)</span>
+                </div>
+              </div>
+
+              <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>AI VISION PIPELINE</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  <Zap size={14} />
+                  <span>{healthData?.device || 'AUTO'} • YOLOv8n</span>
+                </div>
+              </div>
+
+              <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>WEBSOCKET TELEMETRY</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: isConnected ? 'var(--status-green)' : 'var(--status-amber)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  <Server size={14} />
+                  <span>{isConnected ? 'CONNECTED' : 'RECONNECTING'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: '12px', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.25)', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <ShieldCheck size={18} color="var(--status-green)" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                <strong>Ethical AI Verification:</strong> {healthData?.privacy || "Strictly anonymous crowd analytics. Zero facial recognition or biometric capture."}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

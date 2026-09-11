@@ -11,6 +11,11 @@ export interface Session {
   resolution: string;
   created_at: string;
   ended_at?: string;
+  peak_count?: number;
+  avg_count?: number;
+  total_alerts?: number;
+  total_entries?: number;
+  total_exits?: number;
 }
 
 export interface Zone {
@@ -22,6 +27,7 @@ export interface Zone {
   max_capacity: number;
   dwell_threshold_seconds: number;
   is_active: boolean;
+  is_restricted?: boolean;
   created_at: string;
 }
 
@@ -47,6 +53,8 @@ export interface TrackData {
   dwell_time: number;
   zones: string[];
   trajectory: [number, number][];
+  speed?: number;
+  movement_state?: string;
 }
 
 export interface TelemetryFrame {
@@ -72,6 +80,7 @@ export interface TelemetryFrame {
     coordinates: [number, number][];
     color: string;
     max_capacity: number;
+    is_restricted?: boolean;
   }>;
 }
 
@@ -93,4 +102,20 @@ export interface HeatmapPoint {
   x: number;
   y: number;
   weight: number;
+}
+
+export interface SystemHealth {
+  status: string;
+  system_status: string;
+  service: string;
+  version: string;
+  device: string;
+  components: {
+    backend: string;
+    database: string;
+    ai_engine: string;
+    websocket: string;
+    model_path: string;
+  };
+  privacy: string;
 }

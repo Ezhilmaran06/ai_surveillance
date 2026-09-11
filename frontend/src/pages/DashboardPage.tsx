@@ -9,15 +9,25 @@ import {
   Maximize2,
   Video,
   Layers,
-  ShieldAlert
+  ShieldAlert,
+  Clock,
+  Zap,
+  Activity,
+  ArrowRightLeft,
+  BarChart3,
+  Play
 } from 'lucide-react';
 import {
   AreaChart,
   Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend
 } from 'recharts';
 import { StatCard } from '../components/StatCard';
 import { TelemetryFrame, Session, Zone, Alert } from '../types';
@@ -148,7 +158,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           }}>
             {activeSession ? (
               <img
-                src={`http://127.0.0.1:8000/api/sessions/${activeSession.id}/stream?t=${Date.now()}`}
+                src={`/api/sessions/${activeSession.id}/stream?t=${Date.now()}`}
                 alt="Live AI Surveillance Feed"
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={(e) => {
@@ -331,6 +341,81 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 );
               })
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Row 3: Directional Crossings & Alert Distribution Breakdown */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '20px'
+      }}>
+        {/* Directional Crossings Chart */}
+        <div className="hud-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ArrowRightLeft size={16} color="var(--accent-indigo)" />
+              <h3 style={{ fontSize: '0.92rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                Perimeter Line Crossings (Entries vs Exits)
+              </h3>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Net Occupancy: {entries - exits}</span>
+          </div>
+
+          <div style={{ width: '100%', height: '180px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={[
+                  { category: 'Tripwire Inflow', count: entries, fill: '#10b981' },
+                  { category: 'Tripwire Outflow', count: exits, fill: '#38bdf8' },
+                  { category: 'Net Presence', count: Math.max(0, entries - exits), fill: '#06b6d4' }
+                ]}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="category" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+                <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)', borderRadius: '6px', fontSize: '0.8rem' }}
+                />
+                <Bar dataKey="count" name="Persons" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Alert Severity Distribution */}
+        <div className="hud-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldAlert size={16} color="var(--status-red)" />
+              <h3 style={{ fontSize: '0.92rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                Security Incident Severity Distribution
+              </h3>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Total: {alerts.length}</span>
+          </div>
+
+          <div style={{ width: '100%', height: '180px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={[
+                  { severity: 'CRITICAL', count: alerts.filter(a => a.severity === 'critical').length, fill: '#ef4444' },
+                  { severity: 'WARNING', count: alerts.filter(a => a.severity === 'warning').length, fill: '#f59e0b' },
+                  { severity: 'INFO', count: alerts.filter(a => a.severity === 'info').length, fill: '#06b6d4' }
+                ]}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="severity" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+                <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-subtle)', borderRadius: '6px', fontSize: '0.8rem' }}
+                />
+                <Bar dataKey="count" name="Incidents" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
