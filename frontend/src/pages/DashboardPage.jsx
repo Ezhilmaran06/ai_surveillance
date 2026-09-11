@@ -93,6 +93,7 @@ export const DashboardPage = ({
           subValue={`Status: ${currentCount > 15 ? 'HIGH CONGESTION' : currentCount > 8 ? 'MODERATE FLOW' : 'OPTIMAL DENSITY'}`}
           icon={Users}
           color="var(--accent-cyan)"
+          tooltip="See how many people are currently visible in the video or camera feed."
         />
         <StatCard
           title="PEAK CROWD"
@@ -100,6 +101,7 @@ export const DashboardPage = ({
           subValue="Session Max Seen"
           icon={TrendingUp}
           color="var(--accent-blue)"
+          tooltip="The highest number of people detected during the session."
         />
         <StatCard
           title="CROWD DENSITY"
@@ -107,6 +109,7 @@ export const DashboardPage = ({
           subValue="Estimated Spatial Area"
           icon={Gauge}
           color="var(--accent-indigo)"
+          tooltip="Shows how crowded the monitored area is."
         />
         <StatCard
           title="ACTIVE ALERTS"
@@ -114,6 +117,7 @@ export const DashboardPage = ({
           subValue="Unacknowledged events"
           icon={AlertTriangle}
           color={activeAlertsCount > 0 ? "var(--status-red)" : "var(--status-green)"}
+          tooltip="Important events requiring attention, such as restricted-zone entry or overcrowding."
         />
         <StatCard
           title="ENTRIES"
@@ -121,6 +125,7 @@ export const DashboardPage = ({
           subValue="Directional IN trips"
           icon={ArrowDownRight}
           color="var(--status-green)"
+          tooltip="Cumulative count of people entering across the virtual boundary line."
         />
         <StatCard
           title="EXITS"
@@ -128,6 +133,7 @@ export const DashboardPage = ({
           subValue="Directional OUT trips"
           icon={ArrowUpRight}
           color="var(--accent-blue)"
+          tooltip="Cumulative count of people leaving across the virtual boundary line."
         />
       </div>
 

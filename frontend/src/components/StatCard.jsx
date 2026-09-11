@@ -1,11 +1,13 @@
 import React from 'react';
+import { Tooltip } from './Tooltip.jsx';
 
 export const StatCard = ({
   title,
   value,
   subValue,
   icon: Icon,
-  color = 'var(--accent-cyan)'
+  color = 'var(--accent-cyan)',
+  tooltip
 }) => {
   return (
     <div className="hud-panel" style={{
@@ -62,6 +64,7 @@ export const StatCard = ({
             backgroundColor: color
           }} />
           {title}
+          {tooltip && <Tooltip content={tooltip} icon={true} />}
         </div>
         <div className="font-mono" style={{
           fontSize: '1.75rem',

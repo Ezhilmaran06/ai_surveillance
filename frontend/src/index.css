@@ -335,3 +335,18 @@ body {
   }
 }
 
+@keyframes fadeInTooltip {
+  from {
+    opacity: 0;
+    transform: translateY(3px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tooltip-icon-trigger:hover {
+  background-color: rgba(6, 182, 212, 0.25) !important;
+  color: var(--accent-cyan) !important;
+}

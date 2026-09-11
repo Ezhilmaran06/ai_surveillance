@@ -9,6 +9,7 @@ import {
   FileText,
   Settings,
   ShieldCheck,
+  HelpCircle,
   X
 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export const Sidebar = ({
     { id: 'sessions', label: 'Video Sessions', icon: FileVideo },
     { id: 'reports', label: 'Reports & Export', icon: FileText },
     { id: 'settings', label: 'System Settings', icon: Settings },
+    { id: 'help', label: 'Help & How to Use', icon: HelpCircle },
   ];
 
   const handleSelect = (id) => {

@@ -9,6 +9,7 @@ import { AlertsPage } from './pages/AlertsPage';
 import { SessionsPage } from './pages/SessionsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { HelpPage } from './pages/HelpPage';
 import { useSurveillanceWebSocket } from './hooks/useSurveillanceWebSocket';
 import { api } from './services/api';
 
@@ -140,6 +141,7 @@ export const App = () => {
         isAudioEnabled={isAudioEnabled}
         onToggleAudio={handleToggleAudio}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        onNavigateToHelp={() => setActiveTab('help')}
       />
 
       {/* Floating Alert Toast Notification */}
@@ -261,6 +263,10 @@ export const App = () => {
           )}
 
           {activeTab === 'settings' && <SettingsPage />}
+
+          {activeTab === 'help' && (
+            <HelpPage onNavigateToTab={setActiveTab} />
+          )}
         </main>
       </div>
     </div>

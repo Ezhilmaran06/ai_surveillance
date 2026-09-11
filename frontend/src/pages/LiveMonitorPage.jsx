@@ -149,6 +149,7 @@ export const LiveMonitorPage = ({
           subValue="Anonymous Subjects"
           icon={Users}
           color="var(--accent-cyan)"
+          tooltip="Shows how many people are currently visible in the video or camera feed."
         />
         <StatCard
           title="Peak Occupancy"
@@ -156,6 +157,7 @@ export const LiveMonitorPage = ({
           subValue="Session Max Count"
           icon={Activity}
           color="var(--accent-blue)"
+          tooltip="The highest number of people detected during the session."
         />
         <StatCard
           title="Crowd Density"
@@ -163,6 +165,7 @@ export const LiveMonitorPage = ({
           subValue={densityPercent > 70 ? 'CRITICAL CONGESTION' : densityPercent > 40 ? 'MODERATE FLOW' : 'LOW DENSITY'}
           icon={Eye}
           color={densityPercent > 70 ? 'var(--status-red)' : densityPercent > 40 ? 'var(--status-amber)' : 'var(--status-green)'}
+          tooltip="Shows how crowded the monitored area is."
         />
         <StatCard
           title="Line Crossings"
@@ -170,6 +173,7 @@ export const LiveMonitorPage = ({
           subValue="Virtual Tripwires"
           icon={ArrowRightLeft}
           color="var(--accent-indigo)"
+          tooltip="Directional counts of people entering vs exiting across boundary lines."
         />
         <StatCard
           title="Avg Dwell Time"
@@ -177,6 +181,7 @@ export const LiveMonitorPage = ({
           subValue="Active Duration"
           icon={Clock}
           color="var(--status-amber)"
+          tooltip="The approximate amount of time people remain in an area."
         />
       </div>
 

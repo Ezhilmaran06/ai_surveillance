@@ -23,6 +23,7 @@ import {
   Legend
 } from 'recharts';
 import { api } from '../services/api.js';
+import { Tooltip as InfoTooltip } from '../components/Tooltip.jsx';
 
 export const AnalyticsPage = ({ activeSession }) => {
   const [history, setHistory] = useState([]);
@@ -327,6 +328,7 @@ export const AnalyticsPage = ({ activeSession }) => {
               <h3 style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
                 2D Spatial Congregational Thermal Heatmap
               </h3>
+              <InfoTooltip content="Shows areas with more detected activity." icon={true} />
             </div>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
               Gaussian Footpoint Accumulator
@@ -376,7 +378,10 @@ export const AnalyticsPage = ({ activeSession }) => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Avg Dwell Residency</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span>Avg Dwell Residency</span>
+                <InfoTooltip content="The approximate amount of time people remain in an area." icon={true} />
+              </div>
               <div className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>
                 {latest?.average_dwell_time ? `${latest.average_dwell_time.toFixed(1)}s` : '0.0s'}
               </div>
@@ -386,7 +391,10 @@ export const AnalyticsPage = ({ activeSession }) => {
             </div>
 
             <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Estimated Density</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span>Estimated Density</span>
+                <InfoTooltip content="Shows how crowded the monitored area is." icon={true} />
+              </div>
               <div className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--status-amber)' }}>
                 {((latest?.current_count ?? 0) / 50.0).toFixed(2)} /m²
               </div>

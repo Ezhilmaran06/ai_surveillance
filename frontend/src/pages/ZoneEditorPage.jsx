@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Layers, Plus, Trash2, Edit2, Check, RefreshCw, ShieldAlert, Eye, EyeOff, X, Save, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
+import { Tooltip } from '../components/Tooltip.jsx';
 
 export const ZoneEditorPage = ({
   zones = [],
@@ -428,6 +429,7 @@ export const ZoneEditorPage = ({
                 />
                 <ShieldAlert size={15} color={isRestricted ? "var(--status-red)" : "var(--text-muted)"} />
                 <span>Restricted Area (Critical Intrusion Alert)</span>
+                <Tooltip content="An area where you want to monitor entry and receive immediate security alerts." icon={true} />
               </label>
             </div>
           </div>

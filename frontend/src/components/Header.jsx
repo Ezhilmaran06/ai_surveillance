@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Sun, Moon, Volume2, VolumeX, Zap, Activity, CheckCircle2, ShieldCheck, X, Server, Menu } from 'lucide-react';
+import { Bell, Sun, Moon, Volume2, VolumeX, Zap, Activity, CheckCircle2, ShieldCheck, X, Server, Menu, HelpCircle } from 'lucide-react';
 import { Logo } from './Logo.jsx';
 
 export const Header = ({
@@ -9,7 +9,8 @@ export const Header = ({
   onAcknowledgeAll,
   isAudioEnabled = true,
   onToggleAudio,
-  onToggleMobileMenu
+  onToggleMobileMenu,
+  onNavigateToHelp
 }) => {
   const [isLightMode, setIsLightMode] = useState(() => {
     return localStorage.getItem('sentinel_theme') === 'light';
@@ -189,6 +190,18 @@ export const Header = ({
         >
           {isLightMode ? <Moon size={16} color="#0284c7" /> : <Sun size={16} color="#f59e0b" />}
         </button>
+
+        {/* Help & Guide Button */}
+        {onNavigateToHelp && (
+          <button
+            onClick={onNavigateToHelp}
+            className="btn-secondary"
+            style={{ padding: '6px 10px', fontSize: '0.78rem', color: 'var(--accent-cyan)' }}
+            title="Help & How to Use Portal"
+          >
+            <HelpCircle size={16} color="var(--accent-cyan)" />
+          </button>
+        )}
       </div>
 
       {/* System Health Diagnostics Modal */}
