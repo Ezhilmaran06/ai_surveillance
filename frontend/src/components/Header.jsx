@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Sun, Moon, Volume2, VolumeX, Zap, Activity, CheckCircle2, ShieldCheck, X, Server } from 'lucide-react';
+import { Bell, Sun, Moon, Volume2, VolumeX, Zap, Activity, CheckCircle2, ShieldCheck, X, Server, Menu } from 'lucide-react';
 import { Logo } from './Logo.jsx';
 
 export const Header = ({
@@ -8,7 +8,8 @@ export const Header = ({
   activeSessionName,
   onAcknowledgeAll,
   isAudioEnabled = true,
-  onToggleAudio
+  onToggleAudio,
+  onToggleMobileMenu
 }) => {
   const [isLightMode, setIsLightMode] = useState(() => {
     return localStorage.getItem('sentinel_theme') === 'light';
@@ -66,11 +67,21 @@ export const Header = ({
       zIndex: 50,
       gap: '16px'
     }}>
-      {/* Brand & Identity */}
-      <Logo size={36} showText={true} />
+      {/* Brand & Identity + Mobile Menu Toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <button
+          onClick={onToggleMobileMenu}
+          className="mobile-toggle-btn btn-secondary"
+          style={{ padding: '6px 10px', cursor: 'pointer' }}
+          title="Toggle Navigation Menu"
+        >
+          <Menu size={18} color="var(--accent-cyan)" />
+        </button>
+        <Logo size={36} showText={true} />
+      </div>
 
       {/* Center status indicators */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+      <div className="desktop-status-group" style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
         {/* Source feed info */}
         <div style={{
           display: 'flex',

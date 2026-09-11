@@ -22,6 +22,7 @@ export const App = () => {
   const [isAudioEnabled, setIsAudioEnabled] = useState(() => {
     return localStorage.getItem('sentinel_audio') !== 'false';
   });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const prevAlertCountRef = useRef(0);
 
@@ -138,6 +139,7 @@ export const App = () => {
         onAcknowledgeAll={unackCount > 0 ? handleAcknowledgeAll : undefined}
         isAudioEnabled={isAudioEnabled}
         onToggleAudio={handleToggleAudio}
+        onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
 
       {/* Floating Alert Toast Notification */}
@@ -198,14 +200,16 @@ export const App = () => {
         </div>
       )}
 
-      <div style={{ display: 'flex', flex: 1 }}>
+      <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
         <Sidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}
           unacknowledgedAlertsCount={unackCount}
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
         />
 
-        <main style={{ flex: 1, padding: '20px 24px', overflowY: 'auto' }}>
+        <main className="main-content" style={{ flex: 1, padding: '20px 24px', overflowY: 'auto' }}>
           {activeTab === 'dashboard' && (
             <DashboardPage
               telemetry={telemetry}
