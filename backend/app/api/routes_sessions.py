@@ -5,26 +5,65 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from ..config import settings, UPLOAD_DIR
 from ..database import get_db
 from ..models.session import SessionModel
+from ..models.analytics import AnalyticsSummaryModel
+from ..models.alert import AlertModel
 from ..schemas.session import SessionResponse, SessionCreate
 from ..services.video_processor import video_processor
 from ..services.sample_generator import generate_sample_surveillance_video
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
+def _enrich_session(sess: SessionModel, db: Session) -> SessionResponse:
+    stats = db.query(
+        func.max(AnalyticsSummaryModel.current_count),
+        func.avg(AnalyticsSummaryModel.current_count),
+        func.max(AnalyticsSummaryModel.entries_count),
+        func.max(AnalyticsSummaryModel.exits_count)
+    ).filter(AnalyticsSummaryModel.session_id == sess.id).first()
+
+    alerts_cnt = db.query(AlertModel).filter(AlertModel.session_id == sess.id).count()
+
+    peak_count = int(stats[0] or 0) if stats else 0
+    avg_count = round(float(stats[1] or 0.0), 1) if stats else 0.0
+    entries = int(stats[2] or 0) if stats else 0
+    exits = int(stats[3] or 0) if stats else 0
+
+    return SessionResponse(
+        id=sess.id,
+        name=sess.name,
+        source_type=sess.source_type,
+        source_path=sess.source_path,
+        status=sess.status,
+        fps=sess.fps or 25.0,
+        total_frames=sess.total_frames or 0,
+        processed_frames=sess.processed_frames or 0,
+        duration_seconds=sess.duration_seconds or 0.0,
+        resolution=sess.resolution or "AUTO",
+        created_at=sess.created_at,
+        ended_at=sess.ended_at,
+        peak_count=peak_count,
+        avg_count=avg_count,
+        total_alerts=alerts_cnt,
+        total_entries=entries,
+        total_exits=exits
+    )
+
 @router.get("", response_model=List[SessionResponse])
 def get_sessions(db: Session = Depends(get_db)):
-    return db.query(SessionModel).order_by(SessionModel.id.desc()).all()
+    rows = db.query(SessionModel).order_by(SessionModel.id.desc()).all()
+    return [_enrich_session(s, db) for s in rows]
 
 @router.get("/{session_id}", response_model=SessionResponse)
 def get_session(session_id: int, db: Session = Depends(get_db)):
     sess = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not sess:
         raise HTTPException(status_code=404, detail="Session not found")
-    return sess
+    return _enrich_session(sess, db)
 
 @router.post("/upload", response_model=SessionResponse)
 async def upload_video(file: UploadFile = File(...), db: Session = Depends(get_db)):

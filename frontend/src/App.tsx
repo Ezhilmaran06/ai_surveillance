@@ -19,6 +19,7 @@ export const App: React.FC = () => {
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [zones, setZones] = useState<Zone[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [toastAlert, setToastAlert] = useState<Alert | null>(null);
   const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(() => {
     return localStorage.getItem('sentinel_audio') !== 'false';
   });
@@ -95,6 +96,13 @@ export const App: React.FC = () => {
       const data = await api.getAlerts();
       if (data.length > prevAlertCountRef.current && prevAlertCountRef.current > 0) {
         playAlertChime();
+        // Trigger toast for newest alert
+        if (data.length > 0) {
+          setToastAlert(data[0]);
+          setTimeout(() => {
+            setToastAlert((curr) => (curr?.id === data[0].id ? null : curr));
+          }, 6000);
+        }
       }
       prevAlertCountRef.current = data.length;
       setAlerts(data);
@@ -123,7 +131,7 @@ export const App: React.FC = () => {
   const unackCount = alerts.filter((a) => !a.acknowledged).length;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       <Header
         isConnected={isConnected}
         telemetry={telemetry}
@@ -132,6 +140,64 @@ export const App: React.FC = () => {
         isAudioEnabled={isAudioEnabled}
         onToggleAudio={handleToggleAudio}
       />
+
+      {/* Floating Alert Toast Notification */}
+      {toastAlert && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 9999,
+          maxWidth: '420px',
+          backgroundColor: toastAlert.severity === 'critical' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(245, 158, 11, 0.95)',
+          color: '#ffffff',
+          borderRadius: '8px',
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)',
+          padding: '14px 18px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(10px)',
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '0.85rem' }}>
+              <span>⚠️</span>
+              <span style={{ textTransform: 'uppercase' }}>{toastAlert.severity} SECURITY ALERT</span>
+            </div>
+            <button
+              onClick={() => setToastAlert(null)}
+              style={{ background: 'none', border: 'none', color: '#ffffff', cursor: 'pointer', fontSize: '1rem', padding: '0 4px' }}
+            >
+              ×
+            </button>
+          </div>
+          <div style={{ fontSize: '0.82rem', lineHeight: 1.4 }}>
+            {toastAlert.message}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+            <button
+              onClick={() => {
+                setActiveTab('alerts');
+                setToastAlert(null);
+              }}
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: '#ffffff',
+                borderRadius: '4px',
+                padding: '4px 10px',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Inspect Alert
+            </button>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'flex', flex: 1 }}>
         <Sidebar
@@ -183,6 +249,7 @@ export const App: React.FC = () => {
               activeSession={activeSession}
               onSelectSession={setActiveSession}
               onRefreshSessions={loadSessions}
+              onNavigateToTab={setActiveTab}
             />
           )}
 

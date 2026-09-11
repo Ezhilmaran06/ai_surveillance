@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Camera, Play, Trash2, Video, Film, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, Camera, Play, Trash2, Video, Film, CheckCircle2, AlertCircle, BarChart2, FileText, Eye, ExternalLink } from 'lucide-react';
 import { Session } from '../types';
 import { api } from '../services/api';
 
@@ -8,13 +8,15 @@ interface SessionsPageProps {
   activeSession: Session | null;
   onSelectSession: (session: Session) => void;
   onRefreshSessions: () => void;
+  onNavigateToTab?: (tab: 'monitor' | 'analytics' | 'reports') => void;
 }
 
 export const SessionsPage: React.FC<SessionsPageProps> = ({
   sessions,
   activeSession,
   onSelectSession,
-  onRefreshSessions
+  onRefreshSessions,
+  onNavigateToTab
 }) => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -226,11 +228,12 @@ export const SessionsPage: React.FC<SessionsPageProps> = ({
               fontSize: '0.72rem',
               textTransform: 'uppercase'
             }}>
-              <th style={{ padding: '12px 16px' }}>Session Name</th>
-              <th style={{ padding: '12px 16px' }}>Source Type</th>
-              <th style={{ padding: '12px 16px' }}>Status</th>
-              <th style={{ padding: '12px 16px' }}>Resolution / FPS</th>
-              <th style={{ padding: '12px 16px' }}>Frames Processed</th>
+              <th style={{ padding: '12px 16px' }}>Session Details</th>
+              <th style={{ padding: '12px 16px' }}>Source / Status</th>
+              <th style={{ padding: '12px 16px' }}>Duration</th>
+              <th style={{ padding: '12px 16px' }}>Crowd Occupancy</th>
+              <th style={{ padding: '12px 16px' }}>Line Crossings</th>
+              <th style={{ padding: '12px 16px' }}>Security Alerts</th>
               <th style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
@@ -254,52 +257,114 @@ export const SessionsPage: React.FC<SessionsPageProps> = ({
                     </td>
 
                     <td style={{ padding: '12px 16px' }}>
-                      <span style={{
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid var(--border-subtle)',
-                        fontSize: '0.72rem',
-                        textTransform: 'uppercase'
-                      }}>
-                        {s.source_type}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid var(--border-subtle)',
+                          fontSize: '0.68rem',
+                          textTransform: 'uppercase',
+                          width: 'fit-content'
+                        }}>
+                          {s.source_type}
+                        </span>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          color: s.status === 'processing' ? 'var(--status-green)' : s.status === 'completed' ? 'var(--accent-cyan)' : 'var(--text-muted)',
+                          fontWeight: 600
+                        }}>
+                          ● {s.status.toUpperCase()}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td style={{ padding: '12px 16px' }} className="font-mono">
+                      {s.duration_seconds > 0 ? `${s.duration_seconds}s` : 'Live Stream'}
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                        {s.resolution || 'AUTO'} @ {s.fps ? s.fps.toFixed(0) : 25} FPS
+                      </div>
+                    </td>
+
+                    <td style={{ padding: '12px 16px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>
+                        Peak: {s.peak_count || 0}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        Avg: {s.avg_count || 0}
+                      </div>
+                    </td>
+
+                    <td style={{ padding: '12px 16px' }}>
+                      <span style={{ color: 'var(--status-green)', fontWeight: 600 }}>
+                        {s.total_entries || 0} In
+                      </span>
+                      <span style={{ color: 'var(--text-muted)', margin: '0 4px' }}>/</span>
+                      <span style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>
+                        {s.total_exits || 0} Out
                       </span>
                     </td>
 
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{
-                        color: s.status === 'processing' ? 'var(--status-green)' : s.status === 'completed' ? 'var(--accent-cyan)' : 'var(--text-muted)',
-                        fontWeight: 600
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        backgroundColor: (s.total_alerts || 0) > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.1)',
+                        color: (s.total_alerts || 0) > 0 ? 'var(--status-red)' : 'var(--status-green)',
+                        fontWeight: 700,
+                        fontSize: '0.72rem'
                       }}>
-                        ● {s.status.toUpperCase()}
+                        {s.total_alerts || 0} Incidents
                       </span>
                     </td>
 
-                    <td style={{ padding: '12px 16px' }} className="font-mono">
-                      {s.resolution || 'AUTO'} @ {s.fps ? s.fps.toFixed(1) : 25} FPS
-                    </td>
-
-                    <td style={{ padding: '12px 16px' }} className="font-mono">
-                      {s.processed_frames} / {s.total_frames || 'LIVE'}
-                    </td>
-
                     <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '8px' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                         <button
-                          onClick={() => handleStart(s)}
+                          onClick={() => {
+                            handleStart(s);
+                            onNavigateToTab?.('monitor');
+                          }}
                           className="btn-primary"
-                          style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                          style={{ padding: '4px 8px', fontSize: '0.72rem' }}
+                          title="View Live Stream"
                         >
-                          <Play size={12} />
-                          <span>Stream</span>
+                          <Eye size={12} />
+                          <span>View</span>
                         </button>
+
+                        <button
+                          onClick={() => {
+                            onSelectSession(s);
+                            onNavigateToTab?.('analytics');
+                          }}
+                          className="btn-secondary"
+                          style={{ padding: '4px 8px', fontSize: '0.72rem' }}
+                          title="View Session Analytics"
+                        >
+                          <BarChart2 size={12} color="var(--accent-cyan)" />
+                          <span>Analytics</span>
+                        </button>
+
+                        <a
+                          href={`/api/analytics/export/pdf?session_id=${s.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-secondary"
+                          style={{ padding: '4px 8px', fontSize: '0.72rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          title="Generate Executive PDF Report"
+                        >
+                          <FileText size={12} color="var(--accent-blue)" />
+                          <span>Report</span>
+                        </a>
 
                         <button
                           onClick={() => handleDelete(s.id)}
                           className="btn-danger"
-                          style={{ padding: '4px 8px' }}
+                          style={{ padding: '4px 6px' }}
+                          title="Delete Session"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </td>
@@ -308,7 +373,7 @@ export const SessionsPage: React.FC<SessionsPageProps> = ({
               })
             ) : (
               <tr>
-                <td colSpan={6} style={{ padding: '36px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan={7} style={{ padding: '36px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   No sessions registered yet. Choose an option above to begin.
                 </td>
               </tr>

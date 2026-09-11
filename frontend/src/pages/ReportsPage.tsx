@@ -17,6 +17,8 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts 
   };
 
   const pdfUrl = `/api/analytics/export/pdf${activeSession ? `?session_id=${activeSession.id}` : ''}`;
+  const csvUrl = `/api/analytics/export/csv${activeSession ? `?session_id=${activeSession.id}` : ''}`;
+  const jsonUrl = `/api/analytics/export/json${activeSession ? `?session_id=${activeSession.id}` : ''}`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -41,20 +43,39 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ activeSession, alerts 
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button onClick={handlePrint} className="btn-secondary" style={{ fontSize: '0.8rem' }}>
-            <Printer size={14} />
-            Print View
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button onClick={handlePrint} className="btn-secondary" style={{ fontSize: '0.78rem', padding: '6px 12px' }}>
+            <Printer size={13} />
+            <span>Print View</span>
           </button>
+          <a
+            href={csvUrl}
+            download
+            className="btn-secondary"
+            style={{ fontSize: '0.78rem', textDecoration: 'none', padding: '6px 12px' }}
+          >
+            <Download size={13} />
+            <span>CSV Export</span>
+          </a>
+          <a
+            href={jsonUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-secondary"
+            style={{ fontSize: '0.78rem', textDecoration: 'none', padding: '6px 12px' }}
+          >
+            <FileText size={13} color="var(--accent-cyan)" />
+            <span>JSON Export</span>
+          </a>
           <a
             href={pdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"
-            style={{ fontSize: '0.8rem', textDecoration: 'none' }}
+            style={{ fontSize: '0.78rem', textDecoration: 'none', padding: '6px 14px' }}
           >
-            <ExternalLink size={14} />
-            Generate PDF Report
+            <ExternalLink size={13} />
+            <span>Generate Official PDF</span>
           </a>
         </div>
       </div>

@@ -20,5 +20,10 @@ class SessionResponse(SessionBase):
     resolution: str
     created_at: datetime
     ended_at: Optional[datetime] = None
+    peak_count: int = 0
+    avg_count: float = 0.0
+    total_alerts: int = 0
+    total_entries: int = 0
+    total_exits: int = 0
 
     model_config = ConfigDict(from_attributes=True)

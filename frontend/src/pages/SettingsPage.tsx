@@ -210,6 +210,51 @@ export const SettingsPage: React.FC = () => {
                 }}
               />
             </div>
+            <div>
+              <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                Movement Anomaly Threshold (px/sec)
+              </label>
+              <input
+                type="number"
+                min="50"
+                max="500"
+                step="10"
+                value={settings.movement_threshold || 180}
+                onChange={(e) => setSettings({ ...settings, movement_threshold: parseInt(e.target.value) })}
+                style={{
+                  width: '100%',
+                  padding: '8px 10px',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--bg-main)',
+                  border: '1px solid var(--border-subtle)',
+                  color: '#ffffff',
+                  fontSize: '0.82rem'
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                Inference Processing Target FPS
+              </label>
+              <select
+                value={settings.target_fps || 30}
+                onChange={(e) => setSettings({ ...settings, target_fps: parseInt(e.target.value) })}
+                style={{
+                  width: '100%',
+                  padding: '8px 10px',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--bg-main)',
+                  border: '1px solid var(--border-subtle)',
+                  color: '#ffffff',
+                  fontSize: '0.82rem'
+                }}
+              >
+                <option value={15}>15 FPS (Power Saver / Edge CPU)</option>
+                <option value={24}>24 FPS (Cinematic / Standard)</option>
+                <option value={30}>30 FPS (Full Real-time Stream)</option>
+              </select>
+            </div>
           </div>
 
           <div className="hud-panel" style={{ padding: '16px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
